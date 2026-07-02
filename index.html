@@ -12,11 +12,10 @@
     body{font-family:'Segoe UI',Arial,sans-serif;background:#e8f0fb;color:#0a1628;min-height:100vh}
     .hdr{background:linear-gradient(135deg,#0d3b7a,#1a56a0,#1e6fc4);color:#fff;padding:10px 20px;position:sticky;top:0;z-index:100}
     .hdr-inner{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
-    .hdr-left{display:flex;flex-direction:column;gap:2px}
     .hdr-app-title{font-size:20px;font-weight:900;letter-spacing:.5px}
     .hdr-app-sub{font-size:11px;opacity:.8}
-    .hdr-doctor{background:rgba(255,255,255,0.15);border:2px solid rgba(255,255,255,0.4);border-radius:10px;padding:8px 16px;text-align:right;backdrop-filter:blur(4px)}
-    .hdr-doctor-name{font-size:15px;font-weight:800;letter-spacing:.3px}
+    .hdr-doctor{background:rgba(255,255,255,0.15);border:2px solid rgba(255,255,255,0.4);border-radius:10px;padding:8px 16px;text-align:right}
+    .hdr-doctor-name{font-size:15px;font-weight:800}
     .hdr-doctor-cargo{font-size:11px;opacity:.9;margin-top:2px}
     .hdr-doctor-col{font-size:11px;opacity:.8;margin-top:1px}
     .wrap{max-width:980px;margin:0 auto;padding:16px 12px}
@@ -71,7 +70,7 @@
     .tbl-emb td input,.tbl-emb td select{font-size:12px;padding:5px 6px;border:1px solid #7aaad4}
     .tbl-emb tr:nth-child(even) td{background:#f0f5fb}
     .tbl-emb .num-cell{text-align:center;font-weight:800;color:#0d3b7a;width:36px}
-    .stat-box{background:#fff;border-radius:10px;padding:16px;text-align:center;border:1px solid #a8c4e8;box-shadow:0 1px 4px #0d3b7a10}
+    .stat-box{background:#fff;border-radius:10px;padding:16px;text-align:center;border:1px solid #a8c4e8}
     .stat-num{font-size:36px;font-weight:900;color:#0d3b7a;line-height:1}
     .stat-lbl{font-size:12px;font-weight:700;color:#475569;margin-top:6px;text-transform:uppercase}
     .chart-wrap{background:#fff;border-radius:10px;padding:16px;border:1px solid #a8c4e8;margin-bottom:14px}
@@ -79,15 +78,13 @@
     .filtro-item{flex:1;min-width:140px}
     .tbl-list{width:100%;border-collapse:collapse;font-size:13px}
     .tbl-list th{background:#0d3b7a;color:#fff;padding:8px 10px;text-align:left;font-size:12px;font-weight:800}
-    .tbl-list td{padding:7px 10px;border-bottom:1px solid #dbeafe;font-size:13px}
+    .tbl-list td{padding:7px 10px;border-bottom:1px solid #dbeafe}
     .tbl-list tr:nth-child(even) td{background:#f0f5fb}
     .tbl-list tr:hover td{background:#dbeafe;cursor:pointer}
-    /* LOGIN */
     .login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#0d3b7a,#1e6fc4)}
     .login-box{background:#fff;border-radius:16px;padding:40px;width:100%;max-width:400px;box-shadow:0 8px 32px #0003}
     .login-box h1{color:#0d3b7a;font-size:22px;font-weight:900;margin-bottom:4px}
     .login-box p{color:#475569;font-size:13px;margin-bottom:24px}
-    .login-box input{margin-bottom:12px}
     .login-error{color:#b91c1c;font-size:13px;margin-top:8px;font-weight:700}
     .loading{text-align:center;padding:40px;color:#475569;font-size:16px}
   </style>
@@ -95,32 +92,31 @@
 <body>
 <div id="toast"></div>
 <div id="app"></div>
-
 <script>
-// ── SUPABASE CONFIG ────────────────────────────────────────
 const SUPABASE_URL = "https://cwmwtzppgzrxpvpgzrmz.supabase.co";
 const SUPABASE_KEY = "sb_publishable_kEuoJTQJJ8Rmn3y7qSqwjA_D_OgBCJM";
 const { createClient } = supabase;
 const db = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// ── AUTH CONFIG ────────────────────────────────────────────
-// Usuario y contraseña simples (puedes cambiarlos)
-const USERS = [
-  { user: "gonzalez", pass: "clinica2024" }
-];
+const USERS = [{ user:"gonzalez", pass:"clinica2024" }];
 
-// ── UTILIDADES ─────────────────────────────────────────────
 const calcEG = (fur) => {
-  if (!fur) return null;
-  const dias = Math.floor((new Date() - new Date(fur)) / 86400000);
-  if (dias < 0) return null;
-  return { semanas: Math.floor(dias/7), dias: dias%7 };
+  if(!fur) return null;
+  const dias=Math.floor((new Date()-new Date(fur))/86400000);
+  if(dias<0) return null;
+  return {semanas:Math.floor(dias/7),dias:dias%7};
 };
 const egStr = (fur) => { const e=calcEG(fur); return e?`${e.semanas} sem + ${e.dias} días`:"—"; };
 const calcFPP = (fur) => {
-  if (!fur) return null;
+  if(!fur) return null;
   const d=new Date(fur); d.setDate(d.getDate()+280);
   return d.toLocaleDateString("es-ES");
+};
+const calcEGEnFecha = (fur, fechaConsulta) => {
+  if(!fur||!fechaConsulta) return null;
+  const dias=Math.floor((new Date(fechaConsulta)-new Date(fur))/86400000);
+  if(dias<0) return null;
+  return `${Math.floor(dias/7)} sem + ${dias%7} días`;
 };
 const hoy = () => new Date().toISOString().split("T")[0];
 const genId = (lista) => String((lista.reduce((m,p)=>Math.max(m,parseInt(p.id)||0),0))+1).padStart(6,"0");
@@ -130,25 +126,15 @@ const emptyPac = () => ({
   g:"",p:"",a:"",c:"",v:"",menarquia:"",ciclo:"",fur:hoy(),
   grupoABO:"",rh:"",
   antPatologicos:"",antQuirurgicos:"",antFamiliares:"",planificacion:"",
-  embarazosPrevios:[],
-  analisis:[],consultasObs:[],consultasGin:[],ecografias:[]
+  embarazosPrevios:[],analisis:[],consultasObs:[],consultasGin:[],ecografias:[]
 });
-const emptyEmbarazo = (n) => ({ id:Date.now()+n, orden:n, fecha:"", evolucion:"", finalizacion:"", rnSexo:"", rnPeso:"", estadoActual:"" });
+const emptyEmbarazo = (n) => ({id:Date.now()+n,orden:n,fecha:"",evolucion:"",finalizacion:"",rnSexo:"",rnPeso:"",estadoActual:""});
 
-// EG calculada desde FUR referida a una fecha concreta (no hoy)
-const calcEGEnFecha = (fur, fechaConsulta) => {
-  if (!fur || !fechaConsulta) return null;
-  const dias = Math.floor((new Date(fechaConsulta) - new Date(fur)) / 86400000);
-  if (dias < 0) return null;
-  return `${Math.floor(dias/7)} sem + ${dias%7} días`;
-};
-
-// ── ESTADO ─────────────────────────────────────────────────
 let state = {
-  loggedIn: !!sessionStorage.getItem("hc_auth"),
-  pacs:[], vista:"lista", seccion:"pacientes",
-  pac:null, tab:0, bus:"", pdfMenu:false,
-  filtros:{ aseguradora:"", grupoABO:"", rh:"", embarazada:"" },
+  loggedIn:!!sessionStorage.getItem("hc_auth"),
+  pacs:[],vista:"lista",seccion:"pacientes",
+  pac:null,tab:0,bus:"",pdfMenu:false,
+  filtros:{aseguradora:"",grupoABO:"",rh:"",embarazada:""},
   nAnal:{fecha:hoy(),tipo:"",resultado:""},
   nObs:{fecha:hoy(),embarazoId:"",eg:"",motivo:"",peso:"",ta:"",fc:"",au:"",presentacion:"",exploracion:"",diagnostico:"",plan:""},
   nEco:{fecha:hoy(),embarazoId:"",eg:"",crl:"",tn:"",dbp:"",lf:"",ca:"",cc:"",placenta:"",la:"",sexo:"",obs:""},
@@ -158,43 +144,42 @@ let state = {
 
 function flash(m,color="#15803d"){const t=document.getElementById("toast");t.textContent=m;t.style.background=color;t.style.display="block";setTimeout(()=>t.style.display="none",2500);}
 
-// ── SUPABASE CRUD ──────────────────────────────────────────
-async function loadPacs() {
-  document.getElementById("app").innerHTML = `<div class="loading">⏳ Cargando pacientes...</div>`;
-  const { data, error } = await db.from("pacientes").select("*").order("id_hc");
-  if (error) { flash("❌ Error al cargar: "+error.message, "#b91c1c"); state.pacs=[]; }
-  else state.pacs = data.map(r => ({ ...r.datos, _dbid: r.id }));
+async function loadPacs(){
+  document.getElementById("app").innerHTML=`<div class="loading">⏳ Cargando pacientes...</div>`;
+  const {data,error}=await db.from("pacientes").select("*").order("id_hc");
+  if(error){flash("❌ Error: "+error.message,"#b91c1c");state.pacs=[];}
+  else state.pacs=data.map(r=>({...r.datos,_dbid:r.id}));
   render();
 }
 
-async function savePac(pac) {
-  const payload = { id_hc: pac.id, datos: pac };
-  if (pac._dbid) {
-    const { error } = await db.from("pacientes").update(payload).eq("id", pac._dbid);
-    if (error) { flash("❌ Error al guardar: "+error.message, "#b91c1c"); return false; }
+async function savePac(pac){
+  const payload={id_hc:pac.id,datos:pac};
+  if(pac._dbid){
+    const {error}=await db.from("pacientes").update(payload).eq("id",pac._dbid);
+    if(error){flash("❌ Error: "+error.message,"#b91c1c");return false;}
   } else {
-    const { data, error } = await db.from("pacientes").insert(payload).select();
-    if (error) { flash("❌ Error al guardar: "+error.message, "#b91c1c"); return false; }
-    if (data?.[0]) pac._dbid = data[0].id;
+    const {data,error}=await db.from("pacientes").insert(payload).select();
+    if(error){flash("❌ Error: "+error.message,"#b91c1c");return false;}
+    if(data?.[0]) pac._dbid=data[0].id;
   }
   flash("✅ Guardado en Supabase");
   return true;
 }
 
-async function deletePac(pac) {
-  if (!pac._dbid) return;
-  const { error } = await db.from("pacientes").delete().eq("id", pac._dbid);
-  if (error) flash("❌ Error al eliminar: "+error.message, "#b91c1c");
+async function deletePac(pac){
+  if(!pac._dbid) return;
+  await db.from("pacientes").delete().eq("id",pac._dbid);
 }
 
-// ── PDF ────────────────────────────────────────────────────
-const pdfCSS=`*{box-sizing:border-box;margin:0;padding:0}body{font-family:Arial,sans-serif;font-size:12px;color:#0a1628;margin:0;padding:0}.hdr-pdf{background:#0d3b7a;color:#fff;padding:16px 24px;display:flex;justify-content:space-between;align-items:center}.hdr-pdf-left h1{font-size:20px;font-weight:900;margin-bottom:3px}.hdr-pdf-left p{font-size:11px;opacity:.85;margin:1px 0}.hdr-pdf-right{text-align:right;font-size:11px;opacity:.85;line-height:1.6}.titulo-informe{text-align:center;padding:24px 24px 16px;border-bottom:3px solid #0d3b7a;margin-bottom:20px}.titulo-informe h2{font-size:28px;font-weight:900;color:#0d3b7a;letter-spacing:2px;text-transform:uppercase}.titulo-informe .fecha{font-size:14px;color:#475569;margin-top:6px;font-weight:600}.pac-box{background:#0d3b7a;color:#fff;border-radius:10px;padding:16px 20px;margin:0 24px 20px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}.pac-box-left h3{font-size:20px;font-weight:900;margin-bottom:6px}.pac-box-left p{font-size:12px;opacity:.9;margin:2px 0}.pac-box-right{text-align:right}.pac-box-right p{font-size:12px;opacity:.9;margin:2px 0}.pac-box-right .hc{font-size:18px;font-weight:900;margin-bottom:4px}.eg-row{display:flex;gap:10px;flex-wrap:wrap;margin:0 24px 20px}.eg{background:#bfdbfe;border:2px solid #0d3b7a;border-radius:8px;padding:8px 16px;font-weight:900;font-size:14px;color:#0d3b7a;display:inline-block}.content{padding:0 24px}h2.sec{color:#0d3b7a;font-size:14px;border-bottom:2px solid #0d3b7a;padding-bottom:4px;margin-top:18px;margin-bottom:8px}.lbl{font-weight:bold;font-size:10px;color:#0d3b7a;display:block;text-transform:uppercase}table{width:100%;border-collapse:collapse;margin-top:8px}th{background:#0d3b7a;color:#fff;padding:6px 8px;text-align:left;font-size:11px}td{padding:5px 8px;border-bottom:1px solid #dbeafe;font-size:11px}tr:nth-child(even) td{background:#f0f5fb}.obs{border-left:4px solid #0d3b7a;padding:6px 10px;margin-bottom:8px;background:#e8f0fb;border-radius:0 5px 5px 0}.gin{border-left:4px solid #0f766e;padding:6px 10px;margin-bottom:8px;background:#d1fae5;border-radius:0 5px 5px 0}.firma{margin:40px 24px 24px;border-top:2px solid #0d3b7a;padding-top:16px;display:flex;justify-content:flex-end}.firma-box{text-align:center;min-width:260px}.firma-box .firma-linea{border-top:1px solid #0a1628;margin:32px 0 8px;width:100%}.firma-box .firma-nombre{font-size:14px;font-weight:900;color:#0d3b7a}.firma-box .firma-cargo{font-size:11px;color:#475569;margin:2px 0}.firma-box .firma-col{font-size:11px;color:#475569}.firma-box .firma-fecha{font-size:11px;color:#475569;margin-top:4px}`;
+// ── PDF CSS ────────────────────────────────────────────────
+const pdfCSS=`*{box-sizing:border-box;margin:0;padding:0}body{font-family:Arial,sans-serif;font-size:12px;color:#0a1628;margin:0;padding:0}.hdr-pdf{background:#0d3b7a;color:#fff;padding:16px 24px;display:flex;justify-content:space-between;align-items:center}.hdr-pdf-left h1{font-size:20px;font-weight:900;margin-bottom:3px}.hdr-pdf-left p{font-size:11px;opacity:.85;margin:1px 0}.hdr-pdf-right{text-align:right;font-size:11px;opacity:.85;line-height:1.6}.titulo-informe{text-align:center;padding:24px 24px 16px;border-bottom:3px solid #0d3b7a;margin-bottom:20px}.titulo-informe h2{font-size:28px;font-weight:900;color:#0d3b7a;letter-spacing:2px;text-transform:uppercase}.titulo-informe .fecha{font-size:14px;color:#475569;margin-top:6px;font-weight:600}.pac-box{background:#0d3b7a;color:#fff;border-radius:10px;padding:16px 20px;margin:0 24px 20px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}.pac-box-left h3{font-size:20px;font-weight:900;margin-bottom:6px}.pac-box-left p{font-size:12px;opacity:.9;margin:2px 0}.pac-box-right{text-align:right}.pac-box-right p{font-size:12px;opacity:.9;margin:2px 0}.pac-box-right .hc{font-size:18px;font-weight:900;margin-bottom:4px}.eg-row{display:flex;gap:10px;flex-wrap:wrap;margin:0 24px 20px}.eg{background:#bfdbfe;border:2px solid #0d3b7a;border-radius:8px;padding:8px 16px;font-weight:900;font-size:14px;color:#0d3b7a;display:inline-block}.content{padding:0 24px}h2.sec{color:#0d3b7a;font-size:14px;border-bottom:2px solid #0d3b7a;padding-bottom:4px;margin-top:18px;margin-bottom:8px}table{width:100%;border-collapse:collapse;margin-top:8px}th{background:#0d3b7a;color:#fff;padding:6px 8px;text-align:left;font-size:11px}td{padding:5px 8px;border-bottom:1px solid #dbeafe;font-size:11px}tr:nth-child(even) td{background:#f0f5fb}.obs{border-left:4px solid #0d3b7a;padding:6px 10px;margin-bottom:8px;background:#e8f0fb;border-radius:0 5px 5px 0}.gin{border-left:4px solid #0f766e;padding:6px 10px;margin-bottom:8px;background:#d1fae5;border-radius:0 5px 5px 0}.firma{margin:40px 24px 24px;border-top:2px solid #0d3b7a;padding-top:16px;display:flex;justify-content:flex-end}.firma-box{text-align:center;min-width:260px}.firma-linea{border-top:1px solid #0a1628;margin:32px 0 8px;width:100%}.firma-nombre{font-size:14px;font-weight:900;color:#0d3b7a}.firma-cargo{font-size:11px;color:#475569;margin:2px 0}.firma-col{font-size:11px;color:#475569}.firma-fecha{font-size:11px;color:#475569;margin-top:4px}`;
 
 function buildPDF(pac,tipo,embarazoId){
   const egTxt=pac.fur?egStr(pac.fur):"—";
   const fpp=pac.fur?calcFPP(pac.fur):"—";
   const fechaHoy=new Date().toLocaleDateString("es-ES",{day:"2-digit",month:"long",year:"numeric"});
   const tipoLabel=tipo==="completa"?"Historia Clínica Completa":tipo==="obs"?"Informe Obstétrico":tipo==="gin"?"Informe Ginecológico":"Resumen Controles Prenatales";
+
   let body=`
     <div class="hdr-pdf">
       <div class="hdr-pdf-left"><h1>Historia Clínica</h1><p>Ginecología y Obstetricia</p></div>
@@ -202,37 +187,97 @@ function buildPDF(pac,tipo,embarazoId){
     </div>
     <div class="titulo-informe"><h2>${tipoLabel}</h2><div class="fecha">Fecha del informe: ${fechaHoy}</div></div>
     <div class="pac-box">
-      <div class="pac-box-left"><h3>${pac.nombre}</h3><p>📅 Fecha de Nacimiento: ${pac.fechaNac||"—"}</p><p>🏥 Aseguradora: ${pac.aseguradora||"—"}</p></div>
-      <div class="pac-box-right"><div class="hc">HC: ${pac.id}</div><p>🩸 Grupo: ${pac.grupoABO||"—"} ${pac.rh||""}</p><p>Fórmula: G${pac.g||0}P${pac.p||0}A${pac.a||0}C${pac.c||0}V${pac.v||0}</p></div>
+      <div class="pac-box-left">
+        <h3>${pac.nombre}</h3>
+        <p>📅 Fecha de Nacimiento: ${pac.fechaNac||"—"}</p>
+        <p>🏥 Aseguradora: ${pac.aseguradora||"—"}</p>
+      </div>
+      <div class="pac-box-right">
+        <div class="hc">HC: ${pac.id}</div>
+        <p>🩸 Grupo: ${pac.grupoABO||"—"} ${pac.rh||""}</p>
+        <p>Fórmula: G${pac.g||0}P${pac.p||0}A${pac.a||0}C${pac.c||0}V${pac.v||0}</p>
+      </div>
     </div>
     <div class="content">`;
+
   if(pac.fur){body+=`<div class="eg-row"><span class="eg">FUR: ${pac.fur}</span><span class="eg">EG: ${egTxt}</span><span class="eg">FPP: ${fpp}</span></div>`;}
-  if(tipo!=="gin"){body+=`<h2 class="sec">🤰 Datos Obstétricos</h2><p>Fórmula: <b>G${pac.g||0}P${pac.p||0}A${pac.a||0}C${pac.c||0}V${pac.v||0}</b></p>`;}
-  // Antecedentes y grupo en obstétrico, ginecológico y completo
-  if(tipo==="completa"||tipo==="gin"||tipo==="obs"){body+=`<h2 class="sec">📋 Antecedentes</h2><p><b>Grupo/Rh:</b> ${pac.grupoABO||"—"} ${pac.rh||""}</p><p><b>Patológicos:</b> ${pac.antPatologicos||"—"}</p><p><b>Quirúrgicos:</b> ${pac.antQuirurgicos||"—"}</p><p><b>Familiares:</b> ${pac.antFamiliares||"—"}</p><p><b>Planificación:</b> ${pac.planificacion||"—"}</p>`;}
+
+  // Antecedentes aparecen en obs, gin y completa
+  if(tipo==="completa"||tipo==="obs"||tipo==="gin"){
+    body+=`<h2 class="sec">📋 Antecedentes</h2>
+      <p><b>Grupo/Rh:</b> ${pac.grupoABO||"—"} ${pac.rh||""}</p>
+      <p><b>Patológicos:</b> ${pac.antPatologicos||"—"}</p>
+      <p><b>Quirúrgicos:</b> ${pac.antQuirurgicos||"—"}</p>
+      <p><b>Familiares:</b> ${pac.antFamiliares||"—"}</p>
+      <p><b>Planificación:</b> ${pac.planificacion||"—"}</p>`;
+  }
+
+  if(tipo!=="gin"){
+    body+=`<h2 class="sec">🤰 Datos Obstétricos</h2><p>Fórmula: <b>G${pac.g||0}P${pac.p||0}A${pac.a||0}C${pac.c||0}V${pac.v||0}</b></p>`;
+  }
+
   if(tipo==="completa"||tipo==="obs"||tipo==="prenatal"){
     const cs=embarazoId?(pac.consultasObs||[]).filter(c=>c.embarazoId===embarazoId):(pac.consultasObs||[]);
     body+=`<h2 class="sec">🩺 Consultas Obstétricas${embarazoId?" — Embarazo "+embarazoId:""}</h2>`;
     if(!cs.length){body+=`<p>Sin consultas.</p>`;}
-    else{body+=`<table><tr><th>Fecha</th><th>EG</th><th>Motivo</th><th>Peso</th><th>TA</th><th>FC</th><th>AU</th><th>Presentación</th></tr>`;cs.forEach(c=>{body+=`<tr><td>${c.fecha||"—"}</td><td>${c.eg||"—"}</td><td>${c.motivo||"—"}</td><td>${c.peso||"—"} kg</td><td>${c.ta||"—"}</td><td>${c.fc||"—"}</td><td>${c.au||"—"} cm</td><td>${c.presentacion||"—"}</td></tr>`;});body+=`</table>`;}
+    else{
+      body+=`<table><tr><th>Fecha</th><th>EG</th><th>Motivo</th><th>Peso</th><th>TA</th><th>FC</th><th>AU</th><th>Presentación</th></tr>`;
+      cs.forEach(c=>{body+=`<tr><td>${c.fecha||"—"}</td><td>${c.eg||"—"}</td><td>${c.motivo||"—"}</td><td>${c.peso||"—"} kg</td><td>${c.ta||"—"}</td><td>${c.fc||"—"}</td><td>${c.au||"—"} cm</td><td>${c.presentacion||"—"}</td></tr>`;});
+      body+=`</table>`;
+      cs.filter(c=>c.exploracion||c.diagnostico||c.plan).forEach(c=>{
+        body+=`<div class="obs"><b>${c.fecha}</b> — ${c.motivo||""}<br>${c.exploracion?`<b>Exploración:</b> ${c.exploracion}<br>`:""}${c.diagnostico?`<b>Dx:</b> ${c.diagnostico}<br>`:""}${c.plan?`<b>Plan:</b> ${c.plan}`:""}</div>`;
+      });
+    }
     const es=embarazoId?(pac.ecografias||[]).filter(e=>e.embarazoId===embarazoId):(pac.ecografias||[]);
     body+=`<h2 class="sec">🔬 Ecografías</h2>`;
     if(!es.length){body+=`<p>Sin ecografías.</p>`;}
-    else{body+=`<table><tr><th>Fecha</th><th>EG</th><th>CRL</th><th>TN</th><th>DBP</th><th>LF</th><th>CA</th><th>CC</th><th>Placenta</th><th>LA</th><th>Sexo</th></tr>`;es.forEach(e=>{body+=`<tr><td>${e.fecha||"—"}</td><td>${e.eg||"—"}</td><td>${e.crl||"—"}</td><td>${e.tn||"—"}</td><td>${e.dbp||"—"}</td><td>${e.lf||"—"}</td><td>${e.ca||"—"}</td><td>${e.cc||"—"}</td><td>${e.placenta||"—"}</td><td>${e.la||"—"}</td><td>${e.sexo||"—"}</td></tr>${e.obs?`<tr><td colspan="11" style="font-style:italic;color:#475569">Obs: ${e.obs}</td></tr>`:""}`);});body+=`</table>`;}
+    else{
+      body+=`<table><tr><th>Fecha</th><th>EG</th><th>CRL</th><th>TN</th><th>DBP</th><th>LF</th><th>CA</th><th>CC</th><th>Placenta</th><th>LA</th><th>Sexo</th></tr>`;
+      es.forEach(e=>{
+        body+=`<tr><td>${e.fecha||"—"}</td><td>${e.eg||"—"}</td><td>${e.crl||"—"}</td><td>${e.tn||"—"}</td><td>${e.dbp||"—"}</td><td>${e.lf||"—"}</td><td>${e.ca||"—"}</td><td>${e.cc||"—"}</td><td>${e.placenta||"—"}</td><td>${e.la||"—"}</td><td>${e.sexo||"—"}</td></tr>`;
+        if(e.obs) body+=`<tr><td colspan="11" style="font-style:italic;color:#475569">Obs: ${e.obs}</td></tr>`;
+      });
+      body+=`</table>`;
+    }
   }
-  if(tipo==="completa"||tipo==="gin"){body+=`<h2 class="sec">🌿 Consultas Ginecológicas</h2>`;(pac.consultasGin||[]).forEach(c=>{body+=`<div class="gin"><b>${c.fecha}</b> — ${c.motivo||""}${c.exploracion?`<br><b>Exploración:</b> ${c.exploracion}`:""}${c.expComplementarias?`<br><b>Exp. Compl.:</b> ${c.expComplementarias}`:""}${c.diagnostico?`<br><b>Dx:</b> ${c.diagnostico}`:""}${c.plan?`<br><b>Plan:</b> ${c.plan}`:""}</div>`;});}
-  if(tipo==="completa"){body+=`<h2 class="sec">🧪 Análisis</h2>`;if(!(pac.analisis||[]).length){body+=`<p>Sin análisis.</p>`;}else{body+=`<table><tr><th>Fecha</th><th>Tipo</th><th>Resultado</th></tr>`;pac.analisis.forEach(a=>{body+=`<tr><td>${a.fecha||"—"}</td><td>${a.tipo}</td><td>${a.resultado||"—"}</td></tr>`;});body+=`</table>`;}}
-  body+=`</div><div class="firma"><div class="firma-box"><div class="firma-linea"></div><div class="firma-nombre">Dr. González Mesa</div><div class="firma-cargo">Catedrático de Obstetricia y Ginecología</div><div class="firma-col">Colegiado en Málaga · Nº 2906192</div><div class="firma-fecha">Málaga, ${fechaHoy}</div></div></div>`;
+
+  if(tipo==="completa"||tipo==="gin"){
+    body+=`<h2 class="sec">🌿 Consultas Ginecológicas</h2>`;
+    (pac.consultasGin||[]).forEach(c=>{
+      body+=`<div class="gin"><b>${c.fecha}</b> — ${c.motivo||""}${c.exploracion?`<br><b>Exploración:</b> ${c.exploracion}`:""}${c.expComplementarias?`<br><b>Exp. Compl.:</b> ${c.expComplementarias}`:""}${c.diagnostico?`<br><b>Dx:</b> ${c.diagnostico}`:""}${c.plan?`<br><b>Plan:</b> ${c.plan}`:""}</div>`;
+    });
+  }
+
+  if(tipo==="completa"){
+    body+=`<h2 class="sec">🧪 Análisis</h2>`;
+    if(!(pac.analisis||[]).length){body+=`<p>Sin análisis.</p>`;}
+    else{
+      body+=`<table><tr><th>Fecha</th><th>Tipo</th><th>Resultado</th></tr>`;
+      pac.analisis.forEach(a=>{body+=`<tr><td>${a.fecha||"—"}</td><td>${a.tipo}</td><td>${a.resultado||"—"}</td></tr>`;});
+      body+=`</table>`;
+    }
+  }
+
+  body+=`</div>
+    <div class="firma">
+      <div class="firma-box">
+        <div class="firma-linea"></div>
+        <div class="firma-nombre">Dr. González Mesa</div>
+        <div class="firma-cargo">Catedrático de Obstetricia y Ginecología</div>
+        <div class="firma-col">Colegiado en Málaga · Nº 2906192</div>
+        <div class="firma-fecha">Málaga, ${fechaHoy}</div>
+      </div>
+    </div>`;
+
   return `<!DOCTYPE html><html><head><meta charset="utf-8"><style>${pdfCSS}</style></head><body>${body}</body></html>`;
 }
+
 function openPDF(pac,tipo,embarazoId){const w=window.open("","_blank");w.document.write(buildPDF(pac,tipo,embarazoId));w.document.close();setTimeout(()=>w.print(),600);}
 
-// ── EXCEL ──────────────────────────────────────────────────
 function exportExcel(){
   const rows=state.pacs.map(p=>({"N° Historia":p.id,"Apellidos y Nombre":p.nombre,"Aseguradora":p.aseguradora||"","Fecha Nac.":p.fechaNac||"","Teléfono":p.telefono||"","G":p.g||0,"P":p.p||0,"A":p.a||0,"C":p.c||0,"V":p.v||0,"Grupo ABO":p.grupoABO||"","Rh":p.rh||"","FUR":p.fur||"","EG actual":p.fur?egStr(p.fur):"","FPP":p.fur?calcFPP(p.fur):""}));
   const wb=XLSX.utils.book_new();
-  const ws=XLSX.utils.json_to_sheet(rows);
-  XLSX.utils.book_append_sheet(wb,ws,"Pacientes");
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(rows),"Pacientes");
   XLSX.writeFile(wb,"Historia_Clinica_Dr_Gonzalez.xlsx");
   flash("✅ Excel exportado");
 }
@@ -243,7 +288,6 @@ function printListado(pacs){
   const w=window.open("","_blank");w.document.write(html);w.document.close();setTimeout(()=>w.print(),600);
 }
 
-// ── FILTRAR ────────────────────────────────────────────────
 function filtrarPacs(){
   const f=state.filtros;
   return state.pacs.filter(p=>{
@@ -257,13 +301,9 @@ function filtrarPacs(){
   });
 }
 
-// ── HEADER ─────────────────────────────────────────────────
 function renderHeader(subtitulo,botones){
   return `<div class="hdr"><div class="hdr-inner">
-    <div class="hdr-left">
-      <div class="hdr-app-title">🏥 Historia Clínica</div>
-      ${subtitulo?`<div class="hdr-app-sub">${subtitulo}</div>`:""}
-    </div>
+    <div><div class="hdr-app-title">🏥 Historia Clínica</div>${subtitulo?`<div class="hdr-app-sub">${subtitulo}</div>`:""}</div>
     <div class="row" style="align-items:center;gap:10px">
       ${botones||""}
       <div class="hdr-doctor">
@@ -275,34 +315,29 @@ function renderHeader(subtitulo,botones){
   </div></div>`;
 }
 
-// ── LOGIN ──────────────────────────────────────────────────
 function renderLogin(error){
-  return `<div class="login-wrap">
-    <div class="login-box">
-      <h1>🏥 Historia Clínica</h1>
-      <p>Dr. González Mesa · Ginecología y Obstetricia</p>
-      <label class="lbl">Usuario</label>
-      <input id="login-user" type="text" placeholder="Usuario" style="margin-bottom:12px">
-      <label class="lbl">Contraseña</label>
-      <input id="login-pass" type="password" placeholder="Contraseña" style="margin-bottom:16px">
-      <button class="btn btn-primary" id="btn-login" style="width:100%;padding:12px;font-size:15px">Entrar</button>
-      ${error?`<div class="login-error">❌ Usuario o contraseña incorrectos</div>`:""}
-    </div>
-  </div>`;
+  return `<div class="login-wrap"><div class="login-box">
+    <h1>🏥 Historia Clínica</h1>
+    <p>Dr. González Mesa · Ginecología y Obstetricia</p>
+    <label class="lbl">Usuario</label>
+    <input id="login-user" type="text" placeholder="Usuario" style="margin-bottom:12px">
+    <label class="lbl">Contraseña</label>
+    <input id="login-pass" type="password" placeholder="Contraseña" style="margin-bottom:16px">
+    <button class="btn btn-primary" id="btn-login" style="width:100%;padding:12px;font-size:15px">Entrar</button>
+    ${error?`<div class="login-error">❌ Usuario o contraseña incorrectos</div>`:""}
+  </div></div>`;
 }
 
-// ── RENDER PRINCIPAL ───────────────────────────────────────
 function render(){
-  if(!state.loggedIn){ document.getElementById("app").innerHTML=renderLogin(); bindLoginEvents(); return; }
-  document.getElementById("app").innerHTML =
-    state.vista==="lista"   ? renderLista() :
-    state.vista==="detalle" ? renderDetalle() :
+  if(!state.loggedIn){document.getElementById("app").innerHTML=renderLogin();bindLoginEvents();return;}
+  document.getElementById("app").innerHTML=
+    state.vista==="lista"?renderLista():
+    state.vista==="detalle"?renderDetalle():
     renderForm();
   bindEvents();
   if(state.vista==="lista"&&state.seccion==="estadisticas") renderCharts();
 }
 
-// ── LISTA ──────────────────────────────────────────────────
 function renderLista(){
   const filtrados=filtrarPacs();
   const total=state.pacs.length;
@@ -313,15 +348,34 @@ function renderLista(){
   let contenido="";
 
   if(state.seccion==="pacientes"){
-    const rows=filtrados.length===0?`<div style="text-align:center;color:#475569;font-size:15px;padding:20px">No hay pacientes con esos filtros.</div>`:filtrados.map(p=>`<div class="pac-row" data-id="${p.id}"><div><div style="font-weight:800;font-size:16px">${p.nombre}</div><div style="font-size:13px;color:#334155;margin-top:2px">HC: ${p.id} · ${p.aseguradora||"Sin aseguradora"} · ${p.grupoABO||"—"}${p.rh||""}</div></div><div style="text-align:right">${p.fur?`<span class="eg-box">EG: ${egStr(p.fur)}</span>`:""}<div style="font-size:13px;color:#334155;margin-top:4px">G${p.g||0}P${p.p||0}A${p.a||0}C${p.c||0}V${p.v||0}</div></div></div>`).join("");
-    contenido=`<div class="filtros-bar"><div class="filtro-item"><label class="lbl">Buscar</label><input id="inp-bus" placeholder="Nombre, HC, aseguradora..." value="${state.bus}"></div><div class="filtro-item"><label class="lbl">Aseguradora</label><input id="fil-aseguradora" placeholder="Filtrar..." value="${state.filtros.aseguradora}"></div><div class="filtro-item"><label class="lbl">Grupo ABO</label><select id="fil-grupoABO"><option value="">Todos</option>${["A","B","AB","O"].map(o=>`<option${state.filtros.grupoABO===o?" selected":""}>${o}</option>`).join("")}</select></div><div class="filtro-item"><label class="lbl">Rh</label><select id="fil-rh"><option value="">Todos</option><option${state.filtros.rh==="Rh+"?" selected":""}>Rh+</option><option${state.filtros.rh==="Rh-"?" selected":""}>Rh-</option></select></div><div class="filtro-item"><label class="lbl">Embarazada</label><select id="fil-embarazada"><option value="">Todas</option><option value="si"${state.filtros.embarazada==="si"?" selected":""}>Sí</option><option value="no"${state.filtros.embarazada==="no"?" selected":""}>No</option></select></div><button class="btn btn-gray btn-sm" id="btn-limpiar-filtros">✕ Limpiar</button></div>
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:8px"><span class="badge">${filtrados.length} de ${total} pacientes</span><div class="row"><button class="btn btn-green btn-sm" id="btn-excel">📊 Excel</button><button class="btn btn-accent btn-sm" id="btn-print-list">🖨️ Listado</button></div></div>${rows}`;
+    const rows=filtrados.length===0?`<div style="text-align:center;color:#475569;font-size:15px;padding:20px">No hay pacientes.</div>`:
+      filtrados.map(p=>`<div class="pac-row" data-id="${p.id}">
+        <div><div style="font-weight:800;font-size:16px">${p.nombre}</div><div style="font-size:13px;color:#334155;margin-top:2px">HC: ${p.id} · ${p.aseguradora||"Sin aseguradora"} · ${p.grupoABO||"—"}${p.rh||""}</div></div>
+        <div style="text-align:right">${p.fur?`<span class="eg-box">EG: ${egStr(p.fur)}</span>`:""}<div style="font-size:13px;color:#334155;margin-top:4px">G${p.g||0}P${p.p||0}A${p.a||0}C${p.c||0}V${p.v||0}</div></div>
+      </div>`).join("");
+    contenido=`
+      <div class="filtros-bar">
+        <div class="filtro-item"><label class="lbl">Buscar</label><input id="inp-bus" placeholder="Nombre, HC, aseguradora..." value="${state.bus}"></div>
+        <div class="filtro-item"><label class="lbl">Aseguradora</label><input id="fil-aseguradora" value="${state.filtros.aseguradora}"></div>
+        <div class="filtro-item"><label class="lbl">Grupo ABO</label><select id="fil-grupoABO"><option value="">Todos</option>${["A","B","AB","O"].map(o=>`<option${state.filtros.grupoABO===o?" selected":""}>${o}</option>`).join("")}</select></div>
+        <div class="filtro-item"><label class="lbl">Rh</label><select id="fil-rh"><option value="">Todos</option><option${state.filtros.rh==="Rh+"?" selected":""}>Rh+</option><option${state.filtros.rh==="Rh-"?" selected":""}>Rh-</option></select></div>
+        <div class="filtro-item"><label class="lbl">Embarazada</label><select id="fil-embarazada"><option value="">Todas</option><option value="si"${state.filtros.embarazada==="si"?" selected":""}>Sí</option><option value="no"${state.filtros.embarazada==="no"?" selected":""}>No</option></select></div>
+        <button class="btn btn-gray btn-sm" id="btn-limpiar-filtros">✕ Limpiar</button>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:8px">
+        <span class="badge">${filtrados.length} de ${total} pacientes</span>
+        <div class="row"><button class="btn btn-green btn-sm" id="btn-excel">📊 Excel</button><button class="btn btn-accent btn-sm" id="btn-print-list">🖨️ Listado</button></div>
+      </div>${rows}`;
   }
 
   if(state.seccion==="estadisticas"){
-    const grupos={};state.pacs.forEach(p=>{const k=(p.grupoABO||"?")+" "+(p.rh||"");grupos[k]=(grupos[k]||0)+1;});
-    const asegMap={};state.pacs.forEach(p=>{const k=p.aseguradora||"Sin aseguradora";asegMap[k]=(asegMap[k]||0)+1;});
-    contenido=`<div class="g5" style="margin-bottom:14px"><div class="stat-box"><div class="stat-num">${total}</div><div class="stat-lbl">Total Pacientes</div></div><div class="stat-box"><div class="stat-num" style="color:#15803d">${embarazadas}</div><div class="stat-lbl">Embarazadas</div></div><div class="stat-box"><div class="stat-num" style="color:#0f766e">${aseguradoras}</div><div class="stat-lbl">Aseguradoras</div></div><div class="stat-box"><div class="stat-num" style="color:#1a56a0">${totalObs}</div><div class="stat-lbl">Consultas Obs.</div></div><div class="stat-box"><div class="stat-num" style="color:#7c3aed">${totalGin}</div><div class="stat-lbl">Consultas Gin.</div></div></div>
+    contenido=`<div class="g5" style="margin-bottom:14px">
+      <div class="stat-box"><div class="stat-num">${total}</div><div class="stat-lbl">Total Pacientes</div></div>
+      <div class="stat-box"><div class="stat-num" style="color:#15803d">${embarazadas}</div><div class="stat-lbl">Embarazadas</div></div>
+      <div class="stat-box"><div class="stat-num" style="color:#0f766e">${aseguradoras}</div><div class="stat-lbl">Aseguradoras</div></div>
+      <div class="stat-box"><div class="stat-num" style="color:#1a56a0">${totalObs}</div><div class="stat-lbl">Consultas Obs.</div></div>
+      <div class="stat-box"><div class="stat-num" style="color:#7c3aed">${totalGin}</div><div class="stat-lbl">Consultas Gin.</div></div>
+    </div>
     <div class="g2"><div class="chart-wrap"><canvas id="chart-grupos" height="200"></canvas></div><div class="chart-wrap"><canvas id="chart-aseguradoras" height="200"></canvas></div></div>
     <div class="chart-wrap"><canvas id="chart-consultas" height="100"></canvas></div>`;
   }
@@ -329,10 +383,11 @@ function renderLista(){
   if(state.seccion==="listado"){
     const f2=filtrarPacs();
     const filas=f2.map(p=>`<tr class="pac-row-tbl" data-id="${p.id}"><td>${p.id}</td><td><b>${p.nombre}</b></td><td>${p.aseguradora||"—"}</td><td>${p.fechaNac||"—"}</td><td>${p.grupoABO||"—"} ${p.rh||""}</td><td>G${p.g||0}P${p.p||0}A${p.a||0}C${p.c||0}V${p.v||0}</td><td>${p.fur?egStr(p.fur):"—"}</td><td>${p.fur?calcFPP(p.fur):"—"}</td><td>${p.telefono||"—"}</td></tr>`).join("");
-    contenido=`<div style="display:flex;justify-content:flex-end;margin-bottom:10px"><button class="btn btn-accent btn-sm" id="btn-print-list2">🖨️ Imprimir</button></div><div style="overflow-x:auto"><table class="tbl-list"><tr><th>HC</th><th>Apellidos y Nombre</th><th>Aseguradora</th><th>Fecha Nac.</th><th>Grupo/Rh</th><th>Fórmula</th><th>EG</th><th>FPP</th><th>Teléfono</th></tr>${filas||`<tr><td colspan="9" style="text-align:center;color:#475569">No hay pacientes</td></tr>`}</table></div>`;
+    contenido=`<div style="display:flex;justify-content:flex-end;margin-bottom:10px"><button class="btn btn-accent btn-sm" id="btn-print-list2">🖨️ Imprimir</button></div>
+      <div style="overflow-x:auto"><table class="tbl-list"><tr><th>HC</th><th>Apellidos y Nombre</th><th>Aseguradora</th><th>Fecha Nac.</th><th>Grupo/Rh</th><th>Fórmula</th><th>EG</th><th>FPP</th><th>Teléfono</th></tr>${filas||`<tr><td colspan="9" style="text-align:center;color:#475569">No hay pacientes</td></tr>`}</table></div>`;
   }
 
-  return `${renderHeader("",`<button class="btn btn-white" id="btn-nueva">+ Nueva Paciente</button><button class="btn btn-gray btn-sm" id="btn-logout">🔒 Salir</button>`)}
+  return `${renderHeader("",`<button class="btn btn-white" id="btn-nueva">+ Nueva Paciente</button><button class="btn btn-gray btn-sm" id="btn-logout" style="margin-left:4px">🔒 Salir</button>`)}
   <div class="wrap">
     <div class="nav-bar">
       <button class="nav-btn${state.seccion==="pacientes"?" active":""}" data-sec="pacientes">👩 Pacientes</button>
@@ -343,7 +398,6 @@ function renderLista(){
   </div>`;
 }
 
-// ── CHARTS ─────────────────────────────────────────────────
 function renderCharts(){
   Object.values(state.charts).forEach(c=>{try{c.destroy();}catch(e){}});state.charts={};
   const grupos={};state.pacs.forEach(p=>{const k=(p.grupoABO||"?")+" "+(p.rh||"");grupos[k]=(grupos[k]||0)+1;});
@@ -355,10 +409,9 @@ function renderCharts(){
   const meses=[];const obsM=[],ginM=[];
   for(let i=5;i>=0;i--){const d=new Date();d.setMonth(d.getMonth()-i);const ym=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}`;meses.push(d.toLocaleDateString("es-ES",{month:"short",year:"numeric"}));obsM.push(state.pacs.reduce((s,p)=>s+(p.consultasObs||[]).filter(c=>(c.fecha||"").startsWith(ym)).length,0));ginM.push(state.pacs.reduce((s,p)=>s+(p.consultasGin||[]).filter(c=>(c.fecha||"").startsWith(ym)).length,0));}
   const cc=document.getElementById("chart-consultas");
-  if(cc) state.charts.cons=new Chart(cc,{type:"bar",data:{labels:meses,datasets:[{label:"Consultas Obstétricas",data:obsM,backgroundColor:"#1a56a0"},{label:"Consultas Ginecológicas",data:ginM,backgroundColor:"#0f766e"}]},options:{plugins:{title:{display:true,text:"Consultas últimos 6 meses",font:{size:14,weight:"bold"},color:"#0d3b7a"}},scales:{y:{beginAtZero:true,ticks:{stepSize:1}}}}});
+  if(cc) state.charts.cons=new Chart(cc,{type:"bar",data:{labels:meses,datasets:[{label:"Obs.",data:obsM,backgroundColor:"#1a56a0"},{label:"Gin.",data:ginM,backgroundColor:"#0f766e"}]},options:{plugins:{title:{display:true,text:"Consultas últimos 6 meses",font:{size:14,weight:"bold"},color:"#0d3b7a"}},scales:{y:{beginAtZero:true,ticks:{stepSize:1}}}}});
 }
 
-// ── DETALLE ────────────────────────────────────────────────
 function renderDetalle(){
   const p=state.pac;
   const eg=p.fur?egStr(p.fur):"—";const fpp=p.fur?calcFPP(p.fur):"—";
@@ -368,12 +421,15 @@ function renderDetalle(){
   const prenItems=embarazos.length===0?`<div style="font-size:12px;color:#475569;padding:4px 12px">Sin embarazos con ID</div>`:embarazos.map(eid=>`<button class="pdf-menu-item" data-pdf="prenatal" data-emb="${eid}">🩺 Embarazo: ${eid}</button>`).join("")+`<button class="pdf-menu-item" data-pdf="prenatal">🩺 Todos los controles</button>`;
   const embTable=(p.embarazosPrevios||[]).length?`<div style="overflow-x:auto;margin-top:10px"><table class="tbl-emb"><tr><th>N°</th><th>Fecha</th><th>Evolución</th><th>Finalización</th><th>RN Sexo</th><th>RN Peso</th><th>Estado Actual</th></tr>${p.embarazosPrevios.map(e=>`<tr><td class="num-cell">${e.orden}</td><td>${e.fecha||"—"}</td><td>${e.evolucion||"—"}</td><td>${e.finalizacion||"—"}</td><td>${e.rnSexo||"—"}</td><td>${e.rnPeso||"—"}</td><td>${e.estadoActual||"—"}</td></tr>`).join("")}</table></div>`:"";
   const obsCards=(p.consultasObs||[]).map(c=>`<div class="obs-card"><div class="row" style="justify-content:space-between;flex-wrap:wrap"><b style="font-size:14px">${c.fecha}</b>${c.embarazoId?`<span class="badge">${c.embarazoId}</span>`:""}${c.eg?`<span class="badge">EG: ${c.eg}</span>`:""}</div><div style="font-size:13px;color:#1e3a5f;margin-top:3px">Motivo: ${c.motivo||"—"}</div>${(c.peso||c.ta||c.fc)?`<div style="font-size:13px">Peso: ${c.peso||"—"} kg · TA: ${c.ta||"—"} · FC: ${c.fc||"—"} lpm</div>`:""}${(c.au||c.presentacion)?`<div style="font-size:13px">AU: ${c.au||"—"} cm · ${c.presentacion||"—"}</div>`:""}${c.exploracion?`<div style="font-size:13px"><b>Exploración:</b> ${c.exploracion}</div>`:""}${c.diagnostico?`<div style="font-size:13px"><b>Dx:</b> ${c.diagnostico}</div>`:""}${c.plan?`<div style="font-size:13px"><b>Plan:</b> ${c.plan}</div>`:""}</div>`).join("");
-  const ecoCards=(p.ecografias||[]).map(e=>`<div class="obs-card"><div class="row"><b style="font-size:14px">${e.fecha}</b>${e.embarazoId?`<span class="badge">${e.embarazoId}</span>`:""}${e.eg?`<span class="badge">EG: ${e.eg} sem</span>`:""}</div><div style="font-size:13px">Sexo: ${e.sexo||"—"}</div><div style="font-size:13px">DBP: ${e.dbp||"—"} · LF: ${e.lf||"—"} · CA: ${e.ca||"—"} · CC: ${e.cc||"—"} mm</div><div style="font-size:13px">Placenta: ${e.placenta||"—"} · LA: ${e.la||"—"}</div>${e.obs?`<div style="font-size:13px;font-style:italic">${e.obs}</div>`:""}</div>`).join("");
+  const ecoCards=(p.ecografias||[]).map(e=>`<div class="obs-card"><div class="row"><b style="font-size:14px">${e.fecha}</b>${e.embarazoId?`<span class="badge">${e.embarazoId}</span>`:""}${e.eg?`<span class="badge">EG: ${e.eg} sem</span>`:""}</div>${(e.crl||e.tn)?`<div style="font-size:13px">CRL: ${e.crl||"—"} mm · TN: ${e.tn||"—"} mm</div>`:""}<div style="font-size:13px">DBP: ${e.dbp||"—"} · LF: ${e.lf||"—"} · CA: ${e.ca||"—"} · CC: ${e.cc||"—"} mm</div><div style="font-size:13px">Placenta: ${e.placenta||"—"} · LA: ${e.la||"—"} · Sexo: ${e.sexo||"—"}</div>${e.obs?`<div style="font-size:12px;font-style:italic;color:#475569">${e.obs}</div>`:""}</div>`).join("");
   const ginCards=(p.consultasGin||[]).map(c=>`<div class="gin-card"><b style="font-size:14px">${c.fecha}</b> — ${c.motivo||"—"}${c.exploracion?`<div style="font-size:13px"><b>Exploración:</b> ${c.exploracion}</div>`:""}${c.expComplementarias?`<div style="font-size:13px"><b>Exp. Compl.:</b> ${c.expComplementarias}</div>`:""}${c.diagnostico?`<div style="font-size:13px"><b>Dx:</b> ${c.diagnostico}</div>`:""}${c.plan?`<div style="font-size:13px"><b>Plan:</b> ${c.plan}</div>`:""}</div>`).join("");
 
   return `${renderHeader(`HC: ${p.id} · ${p.aseguradora||"—"} · ${p.grupoABO||"—"}${p.rh||""}`,
     `<div style="position:relative"><button class="btn btn-accent" id="btn-pdf-toggle">📄 PDF ▾</button>
-    <div class="pdf-menu" id="pdf-menu" style="display:${state.pdfMenu?"block":"none"}"><div class="pdf-menu-label">Informes</div>${pdfItems}<hr class="pdf-divider"><div class="pdf-menu-label">Resumen Prenatal</div>${prenItems}</div></div>
+    <div class="pdf-menu" id="pdf-menu" style="display:${state.pdfMenu?"block":"none"}">
+      <div class="pdf-menu-label">Informes</div>${pdfItems}<hr class="pdf-divider">
+      <div class="pdf-menu-label">Resumen Prenatal</div>${prenItems}
+    </div></div>
     <button class="btn btn-primary" id="btn-editar">✏️ Editar</button>
     <button class="btn btn-danger" id="btn-eliminar">🗑️</button>
     <button class="btn btn-gray" id="btn-volver">← Volver</button>`)}
@@ -394,7 +450,6 @@ function renderDetalle(){
   </div>`;
 }
 
-// ── FORM ───────────────────────────────────────────────────
 function renderForm(){
   const p=state.pac;
   const eg=p.fur?egStr(p.fur):null;const fpp=p.fur?calcFPP(p.fur):null;
@@ -410,128 +465,123 @@ function renderForm(){
   if(t===1){
     const numEmb=parseInt(p.g||0);const embs=p.embarazosPrevios||[];
     while(embs.length<numEmb) embs.push(emptyEmbarazo(embs.length+1));
-    const embRows=embs.slice(0,numEmb).map((e,i)=>`<tr><td class="num-cell">${i+1}</td><td><input class="emb-fecha" data-i="${i}" type="date" value="${e.fecha||""}"></td><td><select class="emb-evolucion" data-i="${i}"><option value="">—</option>${["Normal","Gemelar","Gemelar bicorial","Gemelar monocorial","Ectópico","Molar","Otro"].map(o=>`<option${e.evolucion===o?" selected":""}>${o}</option>`).join("")}</select></td><td><select class="emb-finalizacion" data-i="${i}"><option value="">—</option>${["Parto vaginal","Cesárea","Aborto espontáneo","Aborto terapéutico","Interrupción voluntaria","Éxitus fetal"].map(o=>`<option${e.finalizacion===o?" selected":""}>${o}</option>`).join("")}</select></td><td><select class="emb-rnSexo" data-i="${i}"><option value="">—</option><option${e.rnSexo==="Niño"?" selected":""}>Niño</option><option${e.rnSexo==="Niña"?" selected":""}>Niña</option><option${e.rnSexo==="N/A"?" selected":""}>N/A</option></select></td><td><input class="emb-rnPeso" data-i="${i}" placeholder="gr" value="${e.rnPeso||""}"></td><td><input class="emb-estadoActual" data-i="${i}" placeholder="Vivo/Éxitus..." value="${e.estadoActual||""}"></td></tr>`).join("");
+    const embsPrev=embs.slice(0,numEmb-1>0?numEmb-1:0);
+    const embRows=embsPrev.map((e,i)=>`<tr><td class="num-cell">${i+1}</td><td><input class="emb-fecha" data-i="${i}" type="date" value="${e.fecha||""}"></td><td><select class="emb-evolucion" data-i="${i}"><option value="">—</option>${["Normal","Gemelar","Gemelar bicorial","Gemelar monocorial","Ectópico","Molar","Otro"].map(o=>`<option${e.evolucion===o?" selected":""}>${o}</option>`).join("")}</select></td><td><select class="emb-finalizacion" data-i="${i}"><option value="">—</option>${["Parto vaginal","Cesárea","Aborto espontáneo","Aborto terapéutico","Interrupción voluntaria","Éxitus fetal"].map(o=>`<option${e.finalizacion===o?" selected":""}>${o}</option>`).join("")}</select></td><td><select class="emb-rnSexo" data-i="${i}"><option value="">—</option><option${e.rnSexo==="Niño"?" selected":""}>Niño</option><option${e.rnSexo==="Niña"?" selected":""}>Niña</option><option${e.rnSexo==="N/A"?" selected":""}>N/A</option></select></td><td><input class="emb-rnPeso" data-i="${i}" placeholder="gr" value="${e.rnPeso||""}"></td><td><input class="emb-estadoActual" data-i="${i}" placeholder="Vivo/Éxitus..." value="${e.estadoActual||""}"></td></tr>`).join("");
     tabContent=`<div class="card"><div class="sec-tit sec-blue">📋 Antecedentes Ginecoobstétricos</div>
       <div class="lbl" style="margin-bottom:6px">Fórmula Obstétrica</div>
       <div class="row" style="margin-bottom:14px">${["g","p","a","c","v"].map(k=>`<div style="flex:1"><label class="lbl">${k.toUpperCase()}</label><input id="f-${k}" type="number" min="0" value="${p[k]||""}" style="text-align:center;font-size:16px;font-weight:800"></div>`).join("")}</div>
       <div class="g4"><div><label class="lbl">Grupo ABO</label><select id="f-grupoABO"><option value="">—</option>${["A","B","AB","O"].map(o=>`<option${p.grupoABO===o?" selected":""}>${o}</option>`).join("")}</select></div><div><label class="lbl">Factor Rh</label><select id="f-rh"><option value="">—</option><option${p.rh==="Rh+"?" selected":""}>Rh+</option><option${p.rh==="Rh-"?" selected":""}>Rh-</option></select></div><div><label class="lbl">Menarquia (años)</label><input id="f-menarquia" type="number" value="${p.menarquia||""}"></div><div><label class="lbl">Ciclo (días)</label><input id="f-ciclo" type="number" value="${p.ciclo||""}"></div></div>
-      <div style="margin-top:12px"><label class="lbl">FUR</label><input id="f-fur" type="date" value="${p.fur||""}" style="max-width:200px"></div>
+      <div style="margin-top:12px"><label class="lbl">FUR</label><input id="f-fur" type="date" value="${p.fur||hoy()}" style="max-width:200px"></div>
       <div class="g2" style="margin-top:14px">${[["Antec. Patológicos","antPatologicos"],["Antec. Quirúrgicos","antQuirurgicos"],["Antec. Familiares","antFamiliares"],["Planificación Familiar","planificacion"]].map(([l,k])=>`<div><label class="lbl">${l}</label><textarea id="f-${k}">${p[k]||""}</textarea></div>`).join("")}</div>
-      ${(parseInt(p.g||0)-1)>0?`<div style="margin-top:16px"><div class="sec-tit sec-blue" style="font-size:15px">📅 Embarazos Previos</div><div style="overflow-x:auto"><table class="tbl-emb"><tr><th>N°</th><th>Fecha</th><th>Evolución</th><th>Finalización</th><th>RN Sexo</th><th>RN Peso</th><th>Estado Actual</th></tr>${embRows}</table></div></div>`:""}
-    </div>`;}
+      ${embsPrev.length>0?`<div style="margin-top:16px"><div class="sec-tit sec-blue" style="font-size:15px">📅 Embarazos Previos</div><div style="overflow-x:auto"><table class="tbl-emb"><tr><th>N°</th><th>Fecha</th><th>Evolución</th><th>Finalización</th><th>RN Sexo</th><th>RN Peso</th><th>Estado Actual</th></tr>${embRows}</table></div></div>`:""}
+    </div>`;
+  }
 
   if(t===2){const n=state.nAnal;tabContent=`<div class="card"><div class="sec-tit sec-blue">🧪 Análisis</div><div class="form-sec-blue"><div class="g3"><div><label class="lbl">Fecha</label><input id="na-fecha" type="date" value="${n.fecha}"></div><div><label class="lbl">Tipo</label><input id="na-tipo" placeholder="Hemograma, VIH..." value="${n.tipo}"></div><div><label class="lbl">Resultado</label><input id="na-resultado" value="${n.resultado}"></div></div><button class="btn btn-primary" id="btn-add-anal" style="margin-top:10px">+ Agregar</button></div>${(p.analisis||[]).map(a=>`<div style="display:flex;justify-content:space-between;border-left:3px solid #0ea5e9;padding-left:10px;margin-bottom:7px;align-items:center"><span style="font-size:14px"><b>${a.tipo}</b> — ${a.resultado} <span style="color:#475569;font-size:13px">${a.fecha}</span></span><button class="btn btn-danger btn-sm" data-del-anal="${a.id}">✕</button></div>`).join("")}</div>`;}
 
-  if(t===3){const n=state.nObs;const egAuto=p.fur?calcEGEnFecha(p.fur, n.fecha||hoy()):"";
+  if(t===3){const n=state.nObs;const egAuto=p.fur?calcEGEnFecha(p.fur,n.fecha||hoy()):"";
     tabContent=`<div class="card">${eg?`<div class="eg-banner"><span class="eg-box">📅 FUR: ${new Date(p.fur).toLocaleDateString("es-ES")}</span><span class="eg-box" style="background:#93c5fd">🤰 EG hoy: ${eg}</span><span class="eg-box eg-green">🏁 FPP: ${fpp}</span></div>`:""}
-    <div class="sec-tit sec-blue">🩺 Nueva Consulta Obstétrica</div><div class="form-sec-blue"><div class="g3"><div><label class="lbl">Fecha Consulta</label><input id="no-fecha" type="date" value="${n.fecha}" oninput="updateEGConsulta()"></div><div><label class="lbl">ID Embarazo</label><input id="no-embarazoId" placeholder="ej: EMB-2024" value="${n.embarazoId}"></div><div><label class="lbl">EG en Consulta</label><input id="no-eg" value="${egAuto}" readonly style="background:#bfdbfe;font-weight:800;color:#0d3b7a"></div><div><label class="lbl">Motivo</label><input id="no-motivo" value="${n.motivo}"></div><div><label class="lbl">Peso (kg)</label><input id="no-peso" type="number" value="${n.peso}"></div><div><label class="lbl">TA (mmHg)</label><input id="no-ta" placeholder="120/80" value="${n.ta}"></div><div><label class="lbl">FC (lpm)</label><input id="no-fc" type="number" value="${n.fc}"></div><div><label class="lbl">Altura Uterina (cm)</label><input id="no-au" type="number" value="${n.au}"></div><div><label class="lbl">Presentación</label><select id="no-presentacion"><option value="">—</option>${["Cefálica","Podálica","Transversa","Oblicua"].map(o=>`<option${n.presentacion===o?" selected":""}>${o}</option>`).join("")}</select></div></div>
+    <div class="sec-tit sec-blue">🩺 Nueva Consulta Obstétrica</div><div class="form-sec-blue"><div class="g3">
+      <div><label class="lbl">Fecha Consulta</label><input id="no-fecha" type="date" value="${n.fecha}" oninput="updateEGConsulta()"></div>
+      <div><label class="lbl">ID Embarazo</label><input id="no-embarazoId" placeholder="ej: EMB-2024" value="${n.embarazoId}"></div>
+      <div><label class="lbl">EG en Consulta</label><input id="no-eg" value="${egAuto}" readonly style="background:#bfdbfe;font-weight:800;color:#0d3b7a"></div>
+      <div><label class="lbl">Motivo</label><input id="no-motivo" value="${n.motivo}"></div>
+      <div><label class="lbl">Peso (kg)</label><input id="no-peso" type="number" value="${n.peso}"></div>
+      <div><label class="lbl">TA (mmHg)</label><input id="no-ta" placeholder="120/80" value="${n.ta}"></div>
+      <div><label class="lbl">FC (lpm)</label><input id="no-fc" type="number" value="${n.fc}"></div>
+      <div><label class="lbl">Altura Uterina (cm)</label><input id="no-au" type="number" value="${n.au}"></div>
+      <div><label class="lbl">Presentación</label><select id="no-presentacion"><option value="">—</option>${["Cefálica","Podálica","Transversa","Oblicua"].map(o=>`<option${n.presentacion===o?" selected":""}>${o}</option>`).join("")}</select></div>
+    </div>
     <div class="g2" style="margin-top:10px"><div><label class="lbl">Exploración Física</label><textarea id="no-exploracion">${n.exploracion}</textarea></div><div><label class="lbl">Diagnóstico</label><textarea id="no-diagnostico">${n.diagnostico}</textarea></div><div class="span2"><label class="lbl">Plan / Tratamiento</label><textarea id="no-plan">${n.plan}</textarea></div></div>
     <button class="btn btn-primary" id="btn-add-obs" style="margin-top:10px">+ Agregar Consulta</button></div>
     ${(p.consultasObs||[]).map(c=>`<div class="obs-card" style="display:flex;justify-content:space-between;align-items:flex-start"><div style="flex:1"><div class="row"><b style="font-size:14px">${c.fecha}</b>${c.embarazoId?`<span class="badge">${c.embarazoId}</span>`:""}${c.eg?`<span class="badge">EG: ${c.eg}</span>`:""}</div><div style="font-size:13px;color:#1e3a5f">Motivo: ${c.motivo||"—"}</div>${(c.peso||c.ta||c.fc)?`<div style="font-size:13px">Peso: ${c.peso||"—"} · TA: ${c.ta||"—"} · FC: ${c.fc||"—"}</div>`:""}${c.diagnostico?`<div style="font-size:13px"><b>Dx:</b> ${c.diagnostico}</div>`:""}</div><button class="btn btn-danger btn-sm" data-del-obs="${c.id}">✕</button></div>`).join("")}
     </div>`;}
 
-  if(t===4){const n=state.nEco;tabContent=`<div class="card"><div class="sec-tit sec-blue">🔬 Ecografías</div><div class="form-sec-blue"><div class="g3"><div><label class="lbl">Fecha</label><input id="ne-fecha" type="date" value="${n.fecha}"></div><div><label class="lbl">ID Embarazo</label><input id="ne-embarazoId" placeholder="ej: EMB-2024" value="${n.embarazoId}"></div><div><label class="lbl">EG (sem)</label><input id="ne-eg" placeholder="ej: 20" value="${n.eg}"></div><div><label class="lbl">CRL (mm) — 1er trim.</label><input id="ne-crl" type="number" placeholder="Long. céfalo-caudal" value="${n.crl||""}"></div><div><label class="lbl">TN (mm)</label><input id="ne-tn" type="number" placeholder="Translucencia nucal" value="${n.tn||""}"></div><div><label class="lbl">DBP (mm)</label><input id="ne-dbp" type="number" value="${n.dbp}"></div><div><label class="lbl">LF (mm)</label><input id="ne-lf" type="number" value="${n.lf}"></div><div><label class="lbl">CA (mm)</label><input id="ne-ca" type="number" value="${n.ca}"></div><div><label class="lbl">CC (mm)</label><input id="ne-cc" type="number" value="${n.cc}"></div><div><label class="lbl">Placenta</label><input id="ne-placenta" value="${n.placenta}"></div><div><label class="lbl">Líquido Amniótico</label><select id="ne-la"><option value="">—</option>${["Normal","Aumentado (polihidramnios)","Disminuido (oligohidramnios)"].map(o=>`<option${n.la===o?" selected":""}>${o}</option>`).join("")}</select></div><div><label class="lbl">Sexo Fetal</label><select id="ne-sexo"><option value="">—</option>${["Masculino","Femenino","No determinado"].map(o=>`<option${n.sexo===o?" selected":""}>${o}</option>`).join("")}</select></div></div><div style="margin-top:10px"><label class="lbl">Observaciones</label><textarea id="ne-obs">${n.obs}</textarea></div><button class="btn btn-primary" id="btn-add-eco" style="margin-top:10px">+ Agregar Ecografía</button></div>${(p.ecografias||[]).map(e=>`<div class="obs-card" style="display:flex;justify-content:space-between;align-items:flex-start"><div><div class="row"><b style="font-size:14px">${e.fecha}</b>${e.embarazoId?`<span class="badge">${e.embarazoId}</span>`:""}${e.eg?`<span class="badge">EG: ${e.eg} sem</span>`:""}</div>${(e.crl||e.tn)?`<div style="font-size:13px">CRL: ${e.crl||"—"} mm · TN: ${e.tn||"—"} mm</div>`:""}<div style="font-size:13px">DBP: ${e.dbp||"—"} · LF: ${e.lf||"—"} · CA: ${e.ca||"—"} · CC: ${e.cc||"—"} mm</div><div style="font-size:13px">Placenta: ${e.placenta||"—"} · LA: ${e.la||"—"} · Sexo: ${e.sexo||"—"}</div>${e.obs?`<div style="font-size:12px;font-style:italic;color:#475569">${e.obs}</div>`:""}</div><button class="btn btn-danger btn-sm" data-del-eco="${e.id}">✕</button></div>`).join("")}</div>`;}
+  if(t===4){const n=state.nEco;tabContent=`<div class="card"><div class="sec-tit sec-blue">🔬 Ecografías</div><div class="form-sec-blue"><div class="g3">
+    <div><label class="lbl">Fecha</label><input id="ne-fecha" type="date" value="${n.fecha}"></div>
+    <div><label class="lbl">ID Embarazo</label><input id="ne-embarazoId" placeholder="ej: EMB-2024" value="${n.embarazoId}"></div>
+    <div><label class="lbl">EG (sem)</label><input id="ne-eg" placeholder="ej: 20" value="${n.eg}"></div>
+    <div><label class="lbl">CRL (mm) 1er trim.</label><input id="ne-crl" type="number" placeholder="Long. céfalo-caudal" value="${n.crl||""}"></div>
+    <div><label class="lbl">TN (mm)</label><input id="ne-tn" type="number" placeholder="Translucencia nucal" value="${n.tn||""}"></div>
+    <div><label class="lbl">DBP (mm)</label><input id="ne-dbp" type="number" value="${n.dbp}"></div>
+    <div><label class="lbl">LF (mm)</label><input id="ne-lf" type="number" value="${n.lf}"></div>
+    <div><label class="lbl">CA (mm)</label><input id="ne-ca" type="number" value="${n.ca}"></div>
+    <div><label class="lbl">CC (mm)</label><input id="ne-cc" type="number" value="${n.cc}"></div>
+    <div><label class="lbl">Placenta</label><input id="ne-placenta" value="${n.placenta}"></div>
+    <div><label class="lbl">Líquido Amniótico</label><select id="ne-la"><option value="">—</option>${["Normal","Aumentado (polihidramnios)","Disminuido (oligohidramnios)"].map(o=>`<option${n.la===o?" selected":""}>${o}</option>`).join("")}</select></div>
+    <div><label class="lbl">Sexo Fetal</label><select id="ne-sexo"><option value="">—</option>${["Masculino","Femenino","No determinado"].map(o=>`<option${n.sexo===o?" selected":""}>${o}</option>`).join("")}</select></div>
+    </div><div style="margin-top:10px"><label class="lbl">Observaciones</label><textarea id="ne-obs">${n.obs}</textarea></div>
+    <button class="btn btn-primary" id="btn-add-eco" style="margin-top:10px">+ Agregar Ecografía</button></div>
+    ${(p.ecografias||[]).map(e=>`<div class="obs-card" style="display:flex;justify-content:space-between;align-items:flex-start"><div>${(e.crl||e.tn)?`<div style="font-size:13px">CRL: ${e.crl||"—"} · TN: ${e.tn||"—"} mm</div>`:""}<div style="font-size:13px">DBP: ${e.dbp||"—"} · LF: ${e.lf||"—"} · CA: ${e.ca||"—"} · CC: ${e.cc||"—"} mm</div>${e.obs?`<div style="font-size:12px;font-style:italic">${e.obs}</div>`:""}</div><button class="btn btn-danger btn-sm" data-del-eco="${e.id}">✕</button></div>`).join("")}
+    </div>`;}
 
-  if(t===5){const n=state.nGin;tabContent=`<div class="card"><div class="sec-tit sec-teal">🌿 Nueva Consulta Ginecológica</div><div class="form-sec-teal"><div class="g2"><div><label class="lbl">Fecha</label><input id="ng-fecha" type="date" value="${n.fecha}"></div><div><label class="lbl">Motivo</label><input id="ng-motivo" value="${n.motivo}"></div></div>${[["Exploración Física","exploracion"],["Exploraciones Complementarias","expComplementarias"],["Diagnóstico","diagnostico"],["Plan / Tratamiento","plan"]].map(([l,k])=>`<div style="margin-top:10px"><label class="lbl">${l}</label><textarea id="ng-${k}">${n[k]}</textarea></div>`).join("")}<button class="btn btn-teal" id="btn-add-gin" style="margin-top:10px">+ Agregar Consulta</button></div>${(p.consultasGin||[]).map(c=>`<div class="gin-card" style="display:flex;justify-content:space-between;align-items:flex-start"><div style="flex:1"><b style="font-size:14px">${c.fecha}</b> — ${c.motivo||"—"}${c.expComplementarias?`<div style="font-size:13px"><b>Exp. Compl.:</b> ${c.expComplementarias}</div>`:""}${c.diagnostico?`<div style="font-size:13px"><b>Dx:</b> ${c.diagnostico}</div>`:""}</div><button class="btn btn-danger btn-sm" data-del-gin="${c.id}">✕</button></div>`).join("")}</div>`;}
+  if(t===5){const n=state.nGin;tabContent=`<div class="card"><div class="sec-tit sec-teal">🌿 Nueva Consulta Ginecológica</div><div class="form-sec-teal">
+    <div class="g2"><div><label class="lbl">Fecha</label><input id="ng-fecha" type="date" value="${n.fecha}"></div><div><label class="lbl">Motivo</label><input id="ng-motivo" value="${n.motivo}"></div></div>
+    ${[["Exploración Física","exploracion"],["Exploraciones Complementarias","expComplementarias"],["Diagnóstico","diagnostico"],["Plan / Tratamiento","plan"]].map(([l,k])=>`<div style="margin-top:10px"><label class="lbl">${l}</label><textarea id="ng-${k}">${n[k]}</textarea></div>`).join("")}
+    <button class="btn btn-teal" id="btn-add-gin" style="margin-top:10px">+ Agregar Consulta</button></div>
+    ${(p.consultasGin||[]).map(c=>`<div class="gin-card" style="display:flex;justify-content:space-between;align-items:flex-start"><div style="flex:1"><b style="font-size:14px">${c.fecha}</b> — ${c.motivo||"—"}${c.expComplementarias?`<div style="font-size:13px"><b>Exp. Compl.:</b> ${c.expComplementarias}</div>`:""}${c.diagnostico?`<div style="font-size:13px"><b>Dx:</b> ${c.diagnostico}</div>`:""}</div><button class="btn btn-danger btn-sm" data-del-gin="${c.id}">✕</button></div>`).join("")}
+    </div>`;}
 
-  return `${renderHeader(`HC: ${p.id}`,`<button class="btn btn-green" id="btn-guardar">💾 Guardar</button><button class="btn btn-gray" id="btn-cancelar">Cancelar</button>`)}
+  return `${renderHeader(`HC: ${p.id}`,`<button class="btn btn-green" id="btn-guardar">💾 Guardar</button><button class="btn btn-gray" id="btn-cancelar" style="margin-left:4px">Cancelar</button>`)}
   <div class="wrap">${egBanner}<div class="tab-bar">${tabBar}</div>${tabContent}</div>`;
 }
 
-// ── BIND LOGIN ─────────────────────────────────────────────
 function bindLoginEvents(){
-  const btn=document.getElementById("btn-login");
-  if(!btn) return;
+  const btn=document.getElementById("btn-login");if(!btn) return;
   const doLogin=()=>{
     const u=document.getElementById("login-user")?.value.trim();
     const p=document.getElementById("login-pass")?.value.trim();
-    const ok=USERS.find(x=>x.user===u&&x.pass===p);
-    if(ok){ sessionStorage.setItem("hc_auth","1"); state.loggedIn=true; loadPacs(); }
-    else{ document.getElementById("app").innerHTML=renderLogin(true); bindLoginEvents(); }
+    if(USERS.find(x=>x.user===u&&x.pass===p)){sessionStorage.setItem("hc_auth","1");state.loggedIn=true;loadPacs();}
+    else{document.getElementById("app").innerHTML=renderLogin(true);bindLoginEvents();}
   };
   btn.onclick=doLogin;
-  document.getElementById("login-pass").onkeydown=e=>{ if(e.key==="Enter") doLogin(); };
+  document.getElementById("login-pass").onkeydown=e=>{if(e.key==="Enter") doLogin();};
 }
 
-// ── BIND EVENTS ────────────────────────────────────────────
 function bindEvents(){
-  // LOGOUT
-  const btnLogout=document.getElementById("btn-logout");
-  if(btnLogout) btnLogout.onclick=()=>{ sessionStorage.removeItem("hc_auth"); state.loggedIn=false; render(); };
-
-  // NAV
-  document.querySelectorAll(".nav-btn").forEach(el=>{ el.onclick=()=>{ state.seccion=el.dataset.sec; render(); }; });
-
-  // LISTA
-  const btnNueva=document.getElementById("btn-nueva");
-  if(btnNueva) btnNueva.onclick=()=>{ const p=emptyPac(); p.id=genId(state.pacs); state.pac=p; state.tab=0; state.vista="form"; render(); };
-  const inpBus=document.getElementById("inp-bus");
-  if(inpBus) inpBus.oninput=e=>{ state.bus=e.target.value; render(); };
-
-  // FILTROS
-  const filAs=document.getElementById("fil-aseguradora");if(filAs) filAs.oninput=e=>{ state.filtros.aseguradora=e.target.value; render(); };
-  const filG=document.getElementById("fil-grupoABO");if(filG) filG.onchange=e=>{ state.filtros.grupoABO=e.target.value; render(); };
-  const filR=document.getElementById("fil-rh");if(filR) filR.onchange=e=>{ state.filtros.rh=e.target.value; render(); };
-  const filE=document.getElementById("fil-embarazada");if(filE) filE.onchange=e=>{ state.filtros.embarazada=e.target.value; render(); };
-  const btnLimpiar=document.getElementById("btn-limpiar-filtros");if(btnLimpiar) btnLimpiar.onclick=()=>{ state.filtros={aseguradora:"",grupoABO:"",rh:"",embarazada:""}; state.bus=""; render(); };
-
-  // EXCEL / PRINT
+  const btnLogout=document.getElementById("btn-logout");if(btnLogout) btnLogout.onclick=()=>{sessionStorage.removeItem("hc_auth");state.loggedIn=false;render();};
+  document.querySelectorAll(".nav-btn").forEach(el=>{el.onclick=()=>{state.seccion=el.dataset.sec;render();};});
+  const btnNueva=document.getElementById("btn-nueva");if(btnNueva) btnNueva.onclick=()=>{const p=emptyPac();p.id=genId(state.pacs);state.pac=p;state.tab=0;state.vista="form";render();};
+  const inpBus=document.getElementById("inp-bus");if(inpBus) inpBus.oninput=e=>{state.bus=e.target.value;render();};
+  const filAs=document.getElementById("fil-aseguradora");if(filAs) filAs.oninput=e=>{state.filtros.aseguradora=e.target.value;render();};
+  const filG=document.getElementById("fil-grupoABO");if(filG) filG.onchange=e=>{state.filtros.grupoABO=e.target.value;render();};
+  const filR=document.getElementById("fil-rh");if(filR) filR.onchange=e=>{state.filtros.rh=e.target.value;render();};
+  const filE=document.getElementById("fil-embarazada");if(filE) filE.onchange=e=>{state.filtros.embarazada=e.target.value;render();};
+  const btnLimpiar=document.getElementById("btn-limpiar-filtros");if(btnLimpiar) btnLimpiar.onclick=()=>{state.filtros={aseguradora:"",grupoABO:"",rh:"",embarazada:""};state.bus="";render();};
   const btnExcel=document.getElementById("btn-excel");if(btnExcel) btnExcel.onclick=exportExcel;
   const btnPrint=document.getElementById("btn-print-list");if(btnPrint) btnPrint.onclick=()=>printListado(filtrarPacs());
   const btnPrint2=document.getElementById("btn-print-list2");if(btnPrint2) btnPrint2.onclick=()=>printListado(filtrarPacs());
-
-  // PAC ROWS
-  document.querySelectorAll(".pac-row,.pac-row-tbl").forEach(el=>{ el.onclick=()=>{ state.pac={...state.pacs.find(p=>p.id===el.dataset.id)}; state.tab=0; state.vista="detalle"; render(); }; });
-
-  // DETALLE
-  const btnEditar=document.getElementById("btn-editar");if(btnEditar) btnEditar.onclick=()=>{ state.vista="form"; render(); };
-  const btnEliminar=document.getElementById("btn-eliminar");
-  if(btnEliminar) btnEliminar.onclick=async()=>{ if(!confirm("¿Eliminar paciente?")) return; await deletePac(state.pac); state.pacs=state.pacs.filter(p=>p.id!==state.pac.id); flash("✅ Eliminado"); state.vista="lista"; render(); };
-  const btnVolver=document.getElementById("btn-volver");if(btnVolver) btnVolver.onclick=()=>{ state.vista="lista"; render(); };
-
-  // PDF
-  const btnPdfToggle=document.getElementById("btn-pdf-toggle");
-  if(btnPdfToggle) btnPdfToggle.onclick=(e)=>{ e.stopPropagation(); state.pdfMenu=!state.pdfMenu; render(); };
-  document.querySelectorAll(".pdf-menu-item").forEach(el=>{ el.onclick=()=>{ openPDF(state.pac,el.dataset.pdf,el.dataset.emb); state.pdfMenu=false; render(); }; });
-  document.addEventListener("click",()=>{ if(state.pdfMenu){state.pdfMenu=false;render();} },{once:true});
-
-  // TABS
-  document.querySelectorAll(".tab-btn").forEach(el=>{ el.onclick=()=>{ collectFormData(); state.tab=parseInt(el.dataset.tab); render(); }; });
-
-  // GUARDAR
+  document.querySelectorAll(".pac-row,.pac-row-tbl").forEach(el=>{el.onclick=()=>{state.pac={...state.pacs.find(p=>p.id===el.dataset.id)};state.tab=0;state.vista="detalle";render();};});
+  const btnEditar=document.getElementById("btn-editar");if(btnEditar) btnEditar.onclick=()=>{state.vista="form";render();};
+  const btnEliminar=document.getElementById("btn-eliminar");if(btnEliminar) btnEliminar.onclick=async()=>{if(!confirm("¿Eliminar paciente?")) return;await deletePac(state.pac);state.pacs=state.pacs.filter(p=>p.id!==state.pac.id);flash("✅ Eliminado");state.vista="lista";render();};
+  const btnVolver=document.getElementById("btn-volver");if(btnVolver) btnVolver.onclick=()=>{state.vista="lista";render();};
+  const btnPdfToggle=document.getElementById("btn-pdf-toggle");if(btnPdfToggle) btnPdfToggle.onclick=(e)=>{e.stopPropagation();state.pdfMenu=!state.pdfMenu;render();};
+  document.querySelectorAll(".pdf-menu-item").forEach(el=>{el.onclick=()=>{openPDF(state.pac,el.dataset.pdf,el.dataset.emb);state.pdfMenu=false;render();};});
+  document.addEventListener("click",()=>{if(state.pdfMenu){state.pdfMenu=false;render();}},{once:true});
+  document.querySelectorAll(".tab-btn").forEach(el=>{el.onclick=()=>{collectFormData();state.tab=parseInt(el.dataset.tab);render();};});
   const btnGuardar=document.getElementById("btn-guardar");
   if(btnGuardar) btnGuardar.onclick=async()=>{
     collectFormData();
     if(!state.pac.nombre.trim()){flash("⚠️ Apellidos y Nombre obligatorio","#b91c1c");return;}
-    const ok=await savePac(state.pac);
-    if(!ok) return;
+    const ok=await savePac(state.pac);if(!ok) return;
     const existe=state.pacs.find(p=>p.id===state.pac.id);
     state.pacs=existe?state.pacs.map(p=>p.id===state.pac.id?state.pac:p):[...state.pacs,state.pac];
-    state.vista="detalle"; render();
+    state.vista="detalle";render();
   };
-  const btnCancelar=document.getElementById("btn-cancelar");if(btnCancelar) btnCancelar.onclick=()=>{ state.vista=state.pacs.find(p=>p.id===state.pac.id)?"detalle":"lista"; render(); };
-
-  // FUR / G live
-  const furInp=document.getElementById("f-fur");if(furInp) furInp.oninput=e=>{ collectFormData(); state.pac.fur=e.target.value; render(); };
-  const gInp=document.getElementById("f-g");if(gInp) gInp.oninput=e=>{ collectFormData(); state.pac.g=e.target.value; render(); };
-
-  // EMBARAZOS TABLE
-  document.querySelectorAll(".emb-fecha,.emb-evolucion,.emb-finalizacion,.emb-rnSexo,.emb-rnPeso,.emb-estadoActual").forEach(el=>{ el.oninput=()=>collectEmbarazos(); el.onchange=()=>collectEmbarazos(); });
-
-  // ADD ITEMS
-  const btnAddAnal=document.getElementById("btn-add-anal");if(btnAddAnal) btnAddAnal.onclick=()=>{ if(!state.nAnal.tipo.trim()) return; state.pac.analisis=[...(state.pac.analisis||[]),{...state.nAnal,id:Date.now()}]; state.nAnal={fecha:hoy(),tipo:"",resultado:""}; render(); };
-  const btnAddObs=document.getElementById("btn-add-obs");if(btnAddObs) btnAddObs.onclick=()=>{ collectObsForm(); if(!state.nObs.motivo.trim()) return; state.nObs.eg=state.pac.fur?egStr(state.pac.fur):state.nObs.eg; state.pac.consultasObs=[...(state.pac.consultasObs||[]),{...state.nObs,id:Date.now()}]; state.nObs={fecha:hoy(),embarazoId:"",eg:"",motivo:"",peso:"",ta:"",fc:"",au:"",presentacion:"",exploracion:"",diagnostico:"",plan:""}; render(); };
-  const btnAddEco=document.getElementById("btn-add-eco");if(btnAddEco) btnAddEco.onclick=()=>{ collectEcoForm(); state.pac.ecografias=[...(state.pac.ecografias||[]),{...state.nEco,id:Date.now()}]; state.nEco={fecha:hoy(),embarazoId:"",eg:"",dbp:"",lf:"",ca:"",cc:"",placenta:"",la:"",sexo:"",obs:""}; render(); };
-  const btnAddGin=document.getElementById("btn-add-gin");if(btnAddGin) btnAddGin.onclick=()=>{ collectGinForm(); if(!state.nGin.motivo.trim()) return; state.pac.consultasGin=[...(state.pac.consultasGin||[]),{...state.nGin,id:Date.now()}]; state.nGin={fecha:hoy(),motivo:"",exploracion:"",expComplementarias:"",diagnostico:"",plan:""}; render(); };
-
-  // DELETE
-  document.querySelectorAll("[data-del-anal]").forEach(el=>{ el.onclick=()=>{ state.pac.analisis=state.pac.analisis.filter(x=>x.id!=el.dataset.delAnal); render(); }; });
-  document.querySelectorAll("[data-del-obs]").forEach(el=>{  el.onclick=()=>{ state.pac.consultasObs=state.pac.consultasObs.filter(x=>x.id!=el.dataset.delObs); render(); }; });
-  document.querySelectorAll("[data-del-eco]").forEach(el=>{  el.onclick=()=>{ state.pac.ecografias=state.pac.ecografias.filter(x=>x.id!=el.dataset.delEco); render(); }; });
-  document.querySelectorAll("[data-del-gin]").forEach(el=>{  el.onclick=()=>{ state.pac.consultasGin=state.pac.consultasGin.filter(x=>x.id!=el.dataset.delGin); render(); }; });
+  const btnCancelar=document.getElementById("btn-cancelar");if(btnCancelar) btnCancelar.onclick=()=>{state.vista=state.pacs.find(p=>p.id===state.pac.id)?"detalle":"lista";render();};
+  const furInp=document.getElementById("f-fur");if(furInp) furInp.oninput=e=>{collectFormData();state.pac.fur=e.target.value;render();};
+  const gInp=document.getElementById("f-g");if(gInp) gInp.oninput=e=>{collectFormData();state.pac.g=e.target.value;render();};
+  document.querySelectorAll(".emb-fecha,.emb-evolucion,.emb-finalizacion,.emb-rnSexo,.emb-rnPeso,.emb-estadoActual").forEach(el=>{el.oninput=()=>collectEmbarazos();el.onchange=()=>collectEmbarazos();});
+  const btnAddAnal=document.getElementById("btn-add-anal");if(btnAddAnal) btnAddAnal.onclick=()=>{if(!state.nAnal.tipo.trim()) return;state.pac.analisis=[...(state.pac.analisis||[]),{...state.nAnal,id:Date.now()}];state.nAnal={fecha:hoy(),tipo:"",resultado:""};render();};
+  const btnAddObs=document.getElementById("btn-add-obs");if(btnAddObs) btnAddObs.onclick=()=>{collectObsForm();if(!state.nObs.motivo.trim()) return;state.nObs.eg=state.pac.fur?calcEGEnFecha(state.pac.fur,state.nObs.fecha||hoy()):state.nObs.eg;state.pac.consultasObs=[...(state.pac.consultasObs||[]),{...state.nObs,id:Date.now()}];state.nObs={fecha:hoy(),embarazoId:"",eg:"",motivo:"",peso:"",ta:"",fc:"",au:"",presentacion:"",exploracion:"",diagnostico:"",plan:""};render();};
+  const btnAddEco=document.getElementById("btn-add-eco");if(btnAddEco) btnAddEco.onclick=()=>{collectEcoForm();state.pac.ecografias=[...(state.pac.ecografias||[]),{...state.nEco,id:Date.now()}];state.nEco={fecha:hoy(),embarazoId:"",eg:"",crl:"",tn:"",dbp:"",lf:"",ca:"",cc:"",placenta:"",la:"",sexo:"",obs:""};render();};
+  const btnAddGin=document.getElementById("btn-add-gin");if(btnAddGin) btnAddGin.onclick=()=>{collectGinForm();if(!state.nGin.motivo.trim()) return;state.pac.consultasGin=[...(state.pac.consultasGin||[]),{...state.nGin,id:Date.now()}];state.nGin={fecha:hoy(),motivo:"",exploracion:"",expComplementarias:"",diagnostico:"",plan:""};render();};
+  document.querySelectorAll("[data-del-anal]").forEach(el=>{el.onclick=()=>{state.pac.analisis=state.pac.analisis.filter(x=>x.id!=el.dataset.delAnal);render();};});
+  document.querySelectorAll("[data-del-obs]").forEach(el=>{el.onclick=()=>{state.pac.consultasObs=state.pac.consultasObs.filter(x=>x.id!=el.dataset.delObs);render();};});
+  document.querySelectorAll("[data-del-eco]").forEach(el=>{el.onclick=()=>{state.pac.ecografias=state.pac.ecografias.filter(x=>x.id!=el.dataset.delEco);render();};});
+  document.querySelectorAll("[data-del-gin]").forEach(el=>{el.onclick=()=>{state.pac.consultasGin=state.pac.consultasGin.filter(x=>x.id!=el.dataset.delGin);render();};});
 }
 
-// ── COLLECT ────────────────────────────────────────────────
 function collectFormData(){
   const g=id=>document.getElementById(id)?.value;
   if(state.tab===0){["nombre","aseguradora","fechaNac","telefono","ocupacion","direccion"].forEach(k=>{const v=g("f-"+k);if(v!==undefined)state.pac[k]=v;});}
@@ -542,26 +592,26 @@ function collectFormData(){
   if(state.tab===5) collectGinForm();
 }
 function collectEmbarazos(){
-  const numEmb=parseInt(state.pac.g||0);const embs=state.pac.embarazosPrevios||[];
+  const numEmb=parseInt(state.pac.g||0)-1;if(numEmb<=0){state.pac.embarazosPrevios=[];return;}
+  const embs=state.pac.embarazosPrevios||[];
   while(embs.length<numEmb) embs.push(emptyEmbarazo(embs.length+1));
-  for(let i=0;i<numEmb;i++){const get=cls=>document.querySelector(`.${cls}[data-i="${i}"]`)?.value;if(embs[i]){embs[i].fecha=get("emb-fecha")??embs[i].fecha;embs[i].evolucion=get("emb-evolucion")??embs[i].evolucion;embs[i].finalizacion=get("emb-finalizacion")??embs[i].finalizacion;embs[i].rnSexo=get("emb-rnSexo")??embs[i].rnSexo;embs[i].rnPeso=get("emb-rnPeso")??embs[i].rnPeso;embs[i].estadoActual=get("emb-estadoActual")??embs[i].estadoActual;}}
+  for(let i=0;i<numEmb;i++){
+    const get=cls=>document.querySelector(`.${cls}[data-i="${i}"]`)?.value;
+    if(embs[i]){embs[i].fecha=get("emb-fecha")??embs[i].fecha;embs[i].evolucion=get("emb-evolucion")??embs[i].evolucion;embs[i].finalizacion=get("emb-finalizacion")??embs[i].finalizacion;embs[i].rnSexo=get("emb-rnSexo")??embs[i].rnSexo;embs[i].rnPeso=get("emb-rnPeso")??embs[i].rnPeso;embs[i].estadoActual=get("emb-estadoActual")??embs[i].estadoActual;}
+  }
   state.pac.embarazosPrevios=embs.slice(0,numEmb);
 }
 function collectObsForm(){const g=id=>document.getElementById(id)?.value;["fecha","embarazoId","motivo","peso","ta","fc","au","presentacion","exploracion","diagnostico","plan"].forEach(k=>{const v=g("no-"+k);if(v!==undefined)state.nObs[k]=v;});}
 function collectEcoForm(){const g=id=>document.getElementById(id)?.value;["fecha","embarazoId","eg","crl","tn","dbp","lf","ca","cc","placenta","la","sexo","obs"].forEach(k=>{const v=g("ne-"+k);if(v!==undefined)state.nEco[k]=v;});}
-
-// Actualizar EG en consulta según fecha escrita
-window.updateEGConsulta = function() {
-  const fechaConsulta = document.getElementById("no-fecha")?.value;
-  const fur = state.pac?.fur;
-  const egInput = document.getElementById("no-eg");
-  if(egInput && fur && fechaConsulta) {
-    egInput.value = calcEGEnFecha(fur, fechaConsulta) || "";
-  }
-};
 function collectGinForm(){const g=id=>document.getElementById(id)?.value;["fecha","motivo","exploracion","expComplementarias","diagnostico","plan"].forEach(k=>{const v=g("ng-"+k);if(v!==undefined)state.nGin[k]=v;});}
 
-// ── INIT ───────────────────────────────────────────────────
+window.updateEGConsulta=function(){
+  const fechaConsulta=document.getElementById("no-fecha")?.value;
+  const fur=state.pac?.fur;
+  const egInput=document.getElementById("no-eg");
+  if(egInput&&fur&&fechaConsulta) egInput.value=calcEGEnFecha(fur,fechaConsulta)||"";
+};
+
 if(state.loggedIn) loadPacs(); else render();
 </script>
 </body>
