@@ -572,7 +572,15 @@ function bindEvents(){
   const furInp=document.getElementById("f-fur");if(furInp) furInp.oninput=e=>{collectFormData();state.pac.fur=e.target.value;render();};
   const gInp=document.getElementById("f-g");if(gInp) gInp.oninput=e=>{collectFormData();state.pac.g=e.target.value;render();};
   document.querySelectorAll(".emb-fecha,.emb-evolucion,.emb-finalizacion,.emb-rnSexo,.emb-rnPeso,.emb-estadoActual").forEach(el=>{el.oninput=()=>collectEmbarazos();el.onchange=()=>collectEmbarazos();});
-  const btnAddAnal=document.getElementById("btn-add-anal");if(btnAddAnal) btnAddAnal.onclick=()=>{if(!state.nAnal.tipo.trim()) return;state.pac.analisis=[...(state.pac.analisis||[]),{...state.nAnal,id:Date.now()}];state.nAnal={fecha:hoy(),tipo:"",resultado:""};render();};
+  const btnAddAnal=document.getElementById("btn-add-anal");if(btnAddAnal) btnAddAnal.onclick=()=>{
+    const fecha=document.getElementById("na-fecha")?.value||hoy();
+    const tipo=document.getElementById("na-tipo")?.value||"";
+    const resultado=document.getElementById("na-resultado")?.value||"";
+    if(!tipo.trim()) return;
+    state.pac.analisis=[...(state.pac.analisis||[]),{fecha,tipo,resultado,id:Date.now()}];
+    state.nAnal={fecha:hoy(),tipo:"",resultado:""};
+    render();
+  };
   const btnAddObs=document.getElementById("btn-add-obs");if(btnAddObs) btnAddObs.onclick=()=>{collectObsForm();if(!state.nObs.motivo.trim()) return;state.nObs.eg=state.pac.fur?calcEGEnFecha(state.pac.fur,state.nObs.fecha||hoy()):state.nObs.eg;state.pac.consultasObs=[...(state.pac.consultasObs||[]),{...state.nObs,id:Date.now()}];state.nObs={fecha:hoy(),embarazoId:"",eg:"",motivo:"",peso:"",ta:"",fc:"",au:"",presentacion:"",exploracion:"",diagnostico:"",plan:""};render();};
   const btnAddEco=document.getElementById("btn-add-eco");if(btnAddEco) btnAddEco.onclick=()=>{collectEcoForm();state.pac.ecografias=[...(state.pac.ecografias||[]),{...state.nEco,id:Date.now()}];state.nEco={fecha:hoy(),embarazoId:"",eg:"",crl:"",tn:"",dbp:"",lf:"",ca:"",cc:"",placenta:"",la:"",sexo:"",obs:""};render();};
   const btnAddGin=document.getElementById("btn-add-gin");if(btnAddGin) btnAddGin.onclick=()=>{collectGinForm();if(!state.nGin.motivo.trim()) return;state.pac.consultasGin=[...(state.pac.consultasGin||[]),{...state.nGin,id:Date.now()}];state.nGin={fecha:hoy(),motivo:"",exploracion:"",expComplementarias:"",diagnostico:"",plan:""};render();};
