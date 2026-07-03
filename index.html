@@ -248,7 +248,8 @@ function buildPDF(pac,tipo,embarazoId){
     });
   }
 
-  if(tipo==="completa"){
+  // Análisis en completa Y obstétrico
+  if(tipo==="completa"||tipo==="obs"){
     body+=`<h2 class="sec">🧪 Análisis</h2>`;
     if(!(pac.analisis||[]).length){body+=`<p>Sin análisis.</p>`;}
     else{
