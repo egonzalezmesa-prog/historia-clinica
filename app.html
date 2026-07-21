@@ -123,7 +123,7 @@ const genId = (lista) => String((lista.reduce((m,p)=>Math.max(m,parseInt(p.id)||
 
 const emptyPac = () => ({
   id:"",nombre:"",aseguradora:"",fechaNac:"",telefono:"",direccion:"",ocupacion:"",
-  g:"",p:"",a:"",c:"",v:"",menarquia:"",ciclo:"",fur:hoy(),
+  g:"",p:"",a:"",c:"",v:"",menarquia:"",ciclo:"",fur:"",
   grupoABO:"",rh:"",
   antPatologicos:"",antQuirurgicos:"",antFamiliares:"",planificacion:"",
   embarazosPrevios:[],analisis:[],consultasObs:[],consultasGin:[],ecografias:[]
@@ -208,8 +208,7 @@ function buildPDF(pac,tipo,embarazoId){
       <p><b>Grupo/Rh:</b> ${pac.grupoABO||"—"} ${pac.rh||""}</p>
       <p><b>Patológicos:</b> ${pac.antPatologicos||"—"}</p>
       <p><b>Quirúrgicos:</b> ${pac.antQuirurgicos||"—"}</p>
-      <p><b>Familiares:</b> ${pac.antFamiliares||"—"}</p>
-      <p><b>Planificación:</b> ${pac.planificacion||"—"}</p>`;
+      <p><b>Familiares:</b> ${pac.antFamiliares||"—"}</p>`;
   }
 
   if(tipo!=="gin"){
@@ -225,7 +224,7 @@ function buildPDF(pac,tipo,embarazoId){
       cs.forEach(c=>{body+=`<tr><td>${c.fecha||"—"}</td><td>${c.eg||"—"}</td><td>${c.motivo||"—"}</td><td>${c.peso||"—"} kg</td><td>${c.ta||"—"}</td><td>${c.fc||"—"}</td><td>${c.au||"—"} cm</td><td>${c.presentacion||"—"}</td></tr>`;});
       body+=`</table>`;
       cs.filter(c=>c.exploracion||c.diagnostico||c.plan).forEach(c=>{
-        body+=`<div class="obs"><b>${c.fecha}</b> — ${c.motivo||""}<br>${c.exploracion?`<b>Exploración:</b> ${c.exploracion}<br>`:""}${c.diagnostico?`<b>Dx:</b> ${c.diagnostico}<br>`:""}${c.plan?`<b>Plan:</b> ${c.plan}`:""}</div>`;
+        body+=`<div class="obs"><b>${c.fecha}</b> — ${c.motivo||""}<br>${c.exploracion?`<b>Evolución:</b> ${c.exploracion}<br>`:""}${c.diagnostico?`<b>Dx:</b> ${c.diagnostico}<br>`:""}${c.plan?`<b>Plan:</b> ${c.plan}`:""}</div>`;
       });
     }
     const es=embarazoId?(pac.ecografias||[]).filter(e=>e.embarazoId===embarazoId):(pac.ecografias||[]);
@@ -248,7 +247,8 @@ function buildPDF(pac,tipo,embarazoId){
     });
   }
 
-  if(tipo==="completa"){
+  // Análisis en completa Y obstétrico
+  if(tipo==="completa"||tipo==="obs"){
     body+=`<h2 class="sec">🧪 Análisis</h2>`;
     if(!(pac.analisis||[]).length){body+=`<p>Sin análisis.</p>`;}
     else{
@@ -420,7 +420,7 @@ function renderDetalle(){
   const pdfItems=[["completa","📋 Historia Clínica Completa"],["obs","🤰 Informe Obstétrico"],["gin","🌿 Informe Ginecológico"]].map(([t,l])=>`<button class="pdf-menu-item" data-pdf="${t}">${l}</button>`).join("");
   const prenItems=embarazos.length===0?`<div style="font-size:12px;color:#475569;padding:4px 12px">Sin embarazos con ID</div>`:embarazos.map(eid=>`<button class="pdf-menu-item" data-pdf="prenatal" data-emb="${eid}">🩺 Embarazo: ${eid}</button>`).join("")+`<button class="pdf-menu-item" data-pdf="prenatal">🩺 Todos los controles</button>`;
   const embTable=(p.embarazosPrevios||[]).length?`<div style="overflow-x:auto;margin-top:10px"><table class="tbl-emb"><tr><th>N°</th><th>Fecha</th><th>Evolución</th><th>Finalización</th><th>RN Sexo</th><th>RN Peso</th><th>Estado Actual</th></tr>${p.embarazosPrevios.map(e=>`<tr><td class="num-cell">${e.orden}</td><td>${e.fecha||"—"}</td><td>${e.evolucion||"—"}</td><td>${e.finalizacion||"—"}</td><td>${e.rnSexo||"—"}</td><td>${e.rnPeso||"—"}</td><td>${e.estadoActual||"—"}</td></tr>`).join("")}</table></div>`:"";
-  const obsCards=(p.consultasObs||[]).map(c=>`<div class="obs-card"><div class="row" style="justify-content:space-between;flex-wrap:wrap"><b style="font-size:14px">${c.fecha}</b>${c.embarazoId?`<span class="badge">${c.embarazoId}</span>`:""}${c.eg?`<span class="badge">EG: ${c.eg}</span>`:""}</div><div style="font-size:13px;color:#1e3a5f;margin-top:3px">Motivo: ${c.motivo||"—"}</div>${(c.peso||c.ta||c.fc)?`<div style="font-size:13px">Peso: ${c.peso||"—"} kg · TA: ${c.ta||"—"} · FC: ${c.fc||"—"} lpm</div>`:""}${(c.au||c.presentacion)?`<div style="font-size:13px">AU: ${c.au||"—"} cm · ${c.presentacion||"—"}</div>`:""}${c.exploracion?`<div style="font-size:13px"><b>Exploración:</b> ${c.exploracion}</div>`:""}${c.diagnostico?`<div style="font-size:13px"><b>Dx:</b> ${c.diagnostico}</div>`:""}${c.plan?`<div style="font-size:13px"><b>Plan:</b> ${c.plan}</div>`:""}</div>`).join("");
+  const obsCards=(p.consultasObs||[]).map(c=>`<div class="obs-card"><div class="row" style="justify-content:space-between;flex-wrap:wrap"><b style="font-size:14px">${c.fecha}</b>${c.embarazoId?`<span class="badge">${c.embarazoId}</span>`:""}${c.eg?`<span class="badge">EG: ${c.eg}</span>`:""}</div><div style="font-size:13px;color:#1e3a5f;margin-top:3px">Motivo: ${c.motivo||"—"}</div>${(c.peso||c.ta||c.fc)?`<div style="font-size:13px">Peso: ${c.peso||"—"} kg · TA: ${c.ta||"—"} · FC: ${c.fc||"—"} lpm</div>`:""}${(c.au||c.presentacion)?`<div style="font-size:13px">AU: ${c.au||"—"} cm · ${c.presentacion||"—"}</div>`:""}${c.exploracion?`<div style="font-size:13px"><b>Evolución:</b> ${c.exploracion}</div>`:""}${c.diagnostico?`<div style="font-size:13px"><b>Dx:</b> ${c.diagnostico}</div>`:""}${c.plan?`<div style="font-size:13px"><b>Plan:</b> ${c.plan}</div>`:""}</div>`).join("");
   const ecoCards=(p.ecografias||[]).map(e=>`<div class="obs-card"><div class="row"><b style="font-size:14px">${e.fecha}</b>${e.embarazoId?`<span class="badge">${e.embarazoId}</span>`:""}${e.eg?`<span class="badge">EG: ${e.eg} sem</span>`:""}</div>${(e.crl||e.tn)?`<div style="font-size:13px">CRL: ${e.crl||"—"} mm · TN: ${e.tn||"—"} mm</div>`:""}<div style="font-size:13px">DBP: ${e.dbp||"—"} · LF: ${e.lf||"—"} · CA: ${e.ca||"—"} · CC: ${e.cc||"—"} mm</div><div style="font-size:13px">Placenta: ${e.placenta||"—"} · LA: ${e.la||"—"} · Sexo: ${e.sexo||"—"}</div>${e.obs?`<div style="font-size:12px;font-style:italic;color:#475569">${e.obs}</div>`:""}</div>`).join("");
   const ginCards=(p.consultasGin||[]).map(c=>`<div class="gin-card"><b style="font-size:14px">${c.fecha}</b> — ${c.motivo||"—"}${c.exploracion?`<div style="font-size:13px"><b>Exploración:</b> ${c.exploracion}</div>`:""}${c.expComplementarias?`<div style="font-size:13px"><b>Exp. Compl.:</b> ${c.expComplementarias}</div>`:""}${c.diagnostico?`<div style="font-size:13px"><b>Dx:</b> ${c.diagnostico}</div>`:""}${c.plan?`<div style="font-size:13px"><b>Plan:</b> ${c.plan}</div>`:""}</div>`).join("");
 
@@ -471,7 +471,7 @@ function renderForm(){
       <div class="lbl" style="margin-bottom:6px">Fórmula Obstétrica</div>
       <div class="row" style="margin-bottom:14px">${["g","p","a","c","v"].map(k=>`<div style="flex:1"><label class="lbl">${k.toUpperCase()}</label><input id="f-${k}" type="number" min="0" value="${p[k]||""}" style="text-align:center;font-size:16px;font-weight:800"></div>`).join("")}</div>
       <div class="g4"><div><label class="lbl">Grupo ABO</label><select id="f-grupoABO"><option value="">—</option>${["A","B","AB","O"].map(o=>`<option${p.grupoABO===o?" selected":""}>${o}</option>`).join("")}</select></div><div><label class="lbl">Factor Rh</label><select id="f-rh"><option value="">—</option><option${p.rh==="Rh+"?" selected":""}>Rh+</option><option${p.rh==="Rh-"?" selected":""}>Rh-</option></select></div><div><label class="lbl">Menarquia (años)</label><input id="f-menarquia" type="number" value="${p.menarquia||""}"></div><div><label class="lbl">Ciclo (días)</label><input id="f-ciclo" type="number" value="${p.ciclo||""}"></div></div>
-      <div style="margin-top:12px"><label class="lbl">FUR</label><input id="f-fur" type="date" value="${p.fur||hoy()}" style="max-width:200px"></div>
+      <div style="margin-top:12px"><label class="lbl">FUR</label><input id="f-fur" type="date" value="${p.fur||""}" style="max-width:200px"></div>
       <div class="g2" style="margin-top:14px">${[["Antec. Patológicos","antPatologicos"],["Antec. Quirúrgicos","antQuirurgicos"],["Antec. Familiares","antFamiliares"],["Planificación Familiar","planificacion"]].map(([l,k])=>`<div><label class="lbl">${l}</label><textarea id="f-${k}">${p[k]||""}</textarea></div>`).join("")}</div>
       ${embsPrev.length>0?`<div style="margin-top:16px"><div class="sec-tit sec-blue" style="font-size:15px">📅 Embarazos Previos</div><div style="overflow-x:auto"><table class="tbl-emb"><tr><th>N°</th><th>Fecha</th><th>Evolución</th><th>Finalización</th><th>RN Sexo</th><th>RN Peso</th><th>Estado Actual</th></tr>${embRows}</table></div></div>`:""}
     </div>`;
@@ -492,7 +492,7 @@ function renderForm(){
       <div><label class="lbl">Altura Uterina (cm)</label><input id="no-au" type="number" value="${n.au}"></div>
       <div><label class="lbl">Presentación</label><select id="no-presentacion"><option value="">—</option>${["Cefálica","Podálica","Transversa","Oblicua"].map(o=>`<option${n.presentacion===o?" selected":""}>${o}</option>`).join("")}</select></div>
     </div>
-    <div class="g2" style="margin-top:10px"><div><label class="lbl">Exploración Física</label><textarea id="no-exploracion">${n.exploracion}</textarea></div><div><label class="lbl">Diagnóstico</label><textarea id="no-diagnostico">${n.diagnostico}</textarea></div><div class="span2"><label class="lbl">Plan / Tratamiento</label><textarea id="no-plan">${n.plan}</textarea></div></div>
+    <div class="g2" style="margin-top:10px">      <div><label class="lbl">Evolución</label><textarea id="no-exploracion">${n.exploracion}</textarea></div><div><label class="lbl">Diagnóstico</label><textarea id="no-diagnostico">${n.diagnostico}</textarea></div><div class="span2"><label class="lbl">Plan / Tratamiento</label><textarea id="no-plan">${n.plan}</textarea></div></div>
     <button class="btn btn-primary" id="btn-add-obs" style="margin-top:10px">+ Agregar Consulta</button></div>
     ${(p.consultasObs||[]).map(c=>`<div class="obs-card" style="display:flex;justify-content:space-between;align-items:flex-start"><div style="flex:1"><div class="row"><b style="font-size:14px">${c.fecha}</b>${c.embarazoId?`<span class="badge">${c.embarazoId}</span>`:""}${c.eg?`<span class="badge">EG: ${c.eg}</span>`:""}</div><div style="font-size:13px;color:#1e3a5f">Motivo: ${c.motivo||"—"}</div>${(c.peso||c.ta||c.fc)?`<div style="font-size:13px">Peso: ${c.peso||"—"} · TA: ${c.ta||"—"} · FC: ${c.fc||"—"}</div>`:""}${c.diagnostico?`<div style="font-size:13px"><b>Dx:</b> ${c.diagnostico}</div>`:""}</div><button class="btn btn-danger btn-sm" data-del-obs="${c.id}">✕</button></div>`).join("")}
     </div>`;}
@@ -572,7 +572,15 @@ function bindEvents(){
   const furInp=document.getElementById("f-fur");if(furInp) furInp.oninput=e=>{collectFormData();state.pac.fur=e.target.value;render();};
   const gInp=document.getElementById("f-g");if(gInp) gInp.oninput=e=>{collectFormData();state.pac.g=e.target.value;render();};
   document.querySelectorAll(".emb-fecha,.emb-evolucion,.emb-finalizacion,.emb-rnSexo,.emb-rnPeso,.emb-estadoActual").forEach(el=>{el.oninput=()=>collectEmbarazos();el.onchange=()=>collectEmbarazos();});
-  const btnAddAnal=document.getElementById("btn-add-anal");if(btnAddAnal) btnAddAnal.onclick=()=>{if(!state.nAnal.tipo.trim()) return;state.pac.analisis=[...(state.pac.analisis||[]),{...state.nAnal,id:Date.now()}];state.nAnal={fecha:hoy(),tipo:"",resultado:""};render();};
+  const btnAddAnal=document.getElementById("btn-add-anal");if(btnAddAnal) btnAddAnal.onclick=()=>{
+    const fecha=document.getElementById("na-fecha")?.value||hoy();
+    const tipo=document.getElementById("na-tipo")?.value||"";
+    const resultado=document.getElementById("na-resultado")?.value||"";
+    if(!tipo.trim()) return;
+    state.pac.analisis=[...(state.pac.analisis||[]),{fecha,tipo,resultado,id:Date.now()}];
+    state.nAnal={fecha:hoy(),tipo:"",resultado:""};
+    render();
+  };
   const btnAddObs=document.getElementById("btn-add-obs");if(btnAddObs) btnAddObs.onclick=()=>{collectObsForm();if(!state.nObs.motivo.trim()) return;state.nObs.eg=state.pac.fur?calcEGEnFecha(state.pac.fur,state.nObs.fecha||hoy()):state.nObs.eg;state.pac.consultasObs=[...(state.pac.consultasObs||[]),{...state.nObs,id:Date.now()}];state.nObs={fecha:hoy(),embarazoId:"",eg:"",motivo:"",peso:"",ta:"",fc:"",au:"",presentacion:"",exploracion:"",diagnostico:"",plan:""};render();};
   const btnAddEco=document.getElementById("btn-add-eco");if(btnAddEco) btnAddEco.onclick=()=>{collectEcoForm();state.pac.ecografias=[...(state.pac.ecografias||[]),{...state.nEco,id:Date.now()}];state.nEco={fecha:hoy(),embarazoId:"",eg:"",crl:"",tn:"",dbp:"",lf:"",ca:"",cc:"",placenta:"",la:"",sexo:"",obs:""};render();};
   const btnAddGin=document.getElementById("btn-add-gin");if(btnAddGin) btnAddGin.onclick=()=>{collectGinForm();if(!state.nGin.motivo.trim()) return;state.pac.consultasGin=[...(state.pac.consultasGin||[]),{...state.nGin,id:Date.now()}];state.nGin={fecha:hoy(),motivo:"",exploracion:"",expComplementarias:"",diagnostico:"",plan:""};render();};
