@@ -112,7 +112,7 @@ const calcFPP = (fur) => {
   const d=new Date(fur); d.setDate(d.getDate()+280);
   return d.toLocaleDateString("es-ES");
 };
-const calcEGEnFecha = (fur, fechaConsulta) => {
+const estaEmbarazada = (pac) => pac.embarazadaActualmente === "si";
   if(!fur||!fechaConsulta) return null;
   const dias=Math.floor((new Date(fechaConsulta)-new Date(fur))/86400000);
   if(dias<0) return null;
@@ -351,7 +351,7 @@ function renderLista(){
     const rows=filtrados.length===0?`<div style="text-align:center;color:#475569;font-size:15px;padding:20px">No hay pacientes.</div>`:
       filtrados.map(p=>`<div class="pac-row" data-id="${p.id}">
         <div><div style="font-weight:800;font-size:16px">${p.nombre}</div><div style="font-size:13px;color:#334155;margin-top:2px">HC: ${p.id} · ${p.aseguradora||"Sin aseguradora"} · ${p.grupoABO||"—"}${p.rh||""}</div></div>
-        <div style="text-align:right">${p.fur?`<span class="eg-box">EG: ${egStr(p.fur)}</span>`:""}<div style="font-size:13px;color:#334155;margin-top:4px">G${p.g||0}P${p.p||0}A${p.a||0}C${p.c||0}V${p.v||0}</div></div>
+        <div style="text-align:right">${estaEmbarazada(p)?`<span class="eg-box">EG: ${egStr(p.fur)}</span>`:""}<div style="font-size:13px;color:#334155;margin-top:4px">G${p.g||0}P${p.p||0}A${p.a||0}C${p.c||0}V${p.v||0}</div></div>
       </div>`).join("");
     contenido=`
       <div class="filtros-bar">
@@ -416,7 +416,7 @@ function renderDetalle(){
   const p=state.pac;
   const eg=p.fur?egStr(p.fur):"—";const fpp=p.fur?calcFPP(p.fur):"—";
   const embarazos=[...new Set([...(p.consultasObs||[]),...(p.ecografias||[])].map(x=>x.embarazoId).filter(Boolean))];
-  const egBanner=p.fur?`<div class="eg-banner"><span class="eg-box">📅 FUR: ${new Date(p.fur).toLocaleDateString("es-ES")}</span><span class="eg-box" style="background:#93c5fd">🤰 EG: ${eg}</span><span class="eg-box eg-green">🏁 FPP: ${fpp}</span></div>`:"";
+  const egBanner=estaEmbarazada(p)?`<div class="eg-banner"><span class="eg-box">📅 FUR: ${new Date(p.fur).toLocaleDateString("es-ES")}</span><span class="eg-box" style="background:#93c5fd">🤰 EG: ${eg}</span><span class="eg-box eg-green">🏁 FPP: ${fpp}</span></div>`:"";
   const pdfItems=[["completa","📋 Historia Clínica Completa"],["obs","🤰 Informe Obstétrico"],["gin","🌿 Informe Ginecológico"]].map(([t,l])=>`<button class="pdf-menu-item" data-pdf="${t}">${l}</button>`).join("");
   const prenItems=embarazos.length===0?`<div style="font-size:12px;color:#475569;padding:4px 12px">Sin embarazos con ID</div>`:embarazos.map(eid=>`<button class="pdf-menu-item" data-pdf="prenatal" data-emb="${eid}">🩺 Embarazo: ${eid}</button>`).join("")+`<button class="pdf-menu-item" data-pdf="prenatal">🩺 Todos los controles</button>`;
   const embTable=(p.embarazosPrevios||[]).length?`<div style="overflow-x:auto;margin-top:10px"><table class="tbl-emb"><tr><th>N°</th><th>Fecha</th><th>Evolución</th><th>Finalización</th><th>RN Sexo</th><th>RN Peso</th><th>Estado Actual</th></tr>${p.embarazosPrevios.map(e=>`<tr><td class="num-cell">${e.orden}</td><td>${e.fecha||"—"}</td><td>${e.evolucion||"—"}</td><td>${e.finalizacion||"—"}</td><td>${e.rnSexo||"—"}</td><td>${e.rnPeso||"—"}</td><td>${e.estadoActual||"—"}</td></tr>`).join("")}</table></div>`:"";
@@ -455,7 +455,7 @@ function renderForm(){
   const eg=p.fur?egStr(p.fur):null;const fpp=p.fur?calcFPP(p.fur):null;
   const TABS=["Datos","Antecedentes","Análisis","Consulta Obs.","Ecografías","Consulta Gin."];
   const tabBar=TABS.map((t,i)=>`<button class="tab-btn${state.tab===i?" active":""}" data-tab="${i}">${t}</button>`).join("");
-  const egBanner=eg?`<div class="eg-banner"><span class="eg-box">📅 FUR: ${new Date(p.fur).toLocaleDateString("es-ES")}</span><span class="eg-box" style="background:#93c5fd">🤰 EG: ${eg}</span><span class="eg-box eg-green">🏁 FPP: ${fpp}</span></div>`:"";
+  const egBanner=eg&&estaEmbarazada(p)?`<div class="eg-banner"><span class="eg-box">📅 FUR: ${new Date(p.fur).toLocaleDateString("es-ES")}</span><span class="eg-box" style="background:#93c5fd">🤰 EG: ${eg}</span><span class="eg-box eg-green">🏁 FPP: ${fpp}</span></div>`:"";
   const t=state.tab;let tabContent="";
 
   if(t===0) tabContent=`<div class="card"><div class="sec-tit sec-blue">👤 Datos Personales</div>
@@ -472,6 +472,12 @@ function renderForm(){
       <div class="row" style="margin-bottom:14px">${["g","p","a","c","v"].map(k=>`<div style="flex:1"><label class="lbl">${k.toUpperCase()}</label><input id="f-${k}" type="number" min="0" value="${p[k]||""}" style="text-align:center;font-size:16px;font-weight:800"></div>`).join("")}</div>
       <div class="g4"><div><label class="lbl">Grupo ABO</label><select id="f-grupoABO"><option value="">—</option>${["A","B","AB","O"].map(o=>`<option${p.grupoABO===o?" selected":""}>${o}</option>`).join("")}</select></div><div><label class="lbl">Factor Rh</label><select id="f-rh"><option value="">—</option><option${p.rh==="Rh+"?" selected":""}>Rh+</option><option${p.rh==="Rh-"?" selected":""}>Rh-</option></select></div><div><label class="lbl">Menarquia (años)</label><input id="f-menarquia" type="number" value="${p.menarquia||""}"></div><div><label class="lbl">Ciclo (días)</label><input id="f-ciclo" type="number" value="${p.ciclo||""}"></div></div>
       <div style="margin-top:12px"><label class="lbl">FUR</label><input id="f-fur" type="date" value="${p.fur||""}" style="max-width:200px"></div>
+      <div style="margin-top:12px"><label class="lbl">¿Embarazada actualmente?</label>
+        <select id="f-embarazadaActualmente" style="max-width:200px">
+          <option value="no"${(p.embarazadaActualmente||"no")==="no"?" selected":""}>No</option>
+          <option value="si"${p.embarazadaActualmente==="si"?" selected":""}>Sí</option>
+        </select>
+      </div>
       <div class="g2" style="margin-top:14px">${[["Antec. Patológicos","antPatologicos"],["Antec. Quirúrgicos","antQuirurgicos"],["Antec. Familiares","antFamiliares"],["Planificación Familiar","planificacion"]].map(([l,k])=>`<div><label class="lbl">${l}</label><textarea id="f-${k}">${p[k]||""}</textarea></div>`).join("")}</div>
       ${embsPrev.length>0?`<div style="margin-top:16px"><div class="sec-tit sec-blue" style="font-size:15px">📅 Embarazos Previos</div><div style="overflow-x:auto"><table class="tbl-emb"><tr><th>N°</th><th>Fecha</th><th>Evolución</th><th>Finalización</th><th>RN Sexo</th><th>RN Peso</th><th>Estado Actual</th></tr>${embRows}</table></div></div>`:""}
     </div>`;
@@ -593,7 +599,7 @@ function bindEvents(){
 function collectFormData(){
   const g=id=>document.getElementById(id)?.value;
   if(state.tab===0){["nombre","aseguradora","fechaNac","telefono","ocupacion","direccion"].forEach(k=>{const v=g("f-"+k);if(v!==undefined)state.pac[k]=v;});}
-  if(state.tab===1){["g","p","a","c","v","grupoABO","rh","menarquia","ciclo","fur","antPatologicos","antQuirurgicos","antFamiliares","planificacion"].forEach(k=>{const v=g("f-"+k);if(v!==undefined)state.pac[k]=v;});collectEmbarazos();}
+  if(state.tab===1){["g","p","a","c","v","grupoABO","rh","menarquia","ciclo","fur","embarazadaActualmente","antPatologicos","antQuirurgicos","antFamiliares","planificacion"].forEach(k=>{const v=g("f-"+k);if(v!==undefined)state.pac[k]=v;});collectEmbarazos();}
   if(state.tab===2){["fecha","tipo","resultado"].forEach(k=>{const v=g("na-"+k);if(v!==undefined)state.nAnal[k]=v;});}
   if(state.tab===3) collectObsForm();
   if(state.tab===4) collectEcoForm();
